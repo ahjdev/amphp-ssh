@@ -5,14 +5,13 @@ namespace Amp\Ssh\Encryption\CipherMode;
 /**
  * @internal
  */
-final class Cbc implements CipherMode {
+final class Cbc implements CipherMode
+{
     const NAME = 'cbc';
-
     const BLOCK_SIZE = 16;
 
-    private $iv;
-
-    public function __construct(string $iv, string $openSSLMethodName) {
+    public function __construct(private string $iv, string $openSSLMethodName)
+    {
         $this->iv = $iv;
 
         if (\strlen($iv) !== \openssl_cipher_iv_length($openSSLMethodName)) {
@@ -20,11 +19,13 @@ final class Cbc implements CipherMode {
         }
     }
 
-    public function getCurrentIV(): string {
+    public function getCurrentIV(): string
+    {
         return $this->iv;
     }
 
-    public function updateIV(string $payload) {
+    public function updateIV(string $payload)
+    {
         $this->iv = \substr($payload, self::BLOCK_SIZE * -1);
     }
 }
