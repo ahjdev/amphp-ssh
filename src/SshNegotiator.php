@@ -5,9 +5,5 @@ namespace Amp\Ssh;
 
 interface SshNegotiator
 {
-    public function negotiate(
-        SshPacketHandler $binaryPacketHandler,
-        string $serverIdentification,
-        string $clientIdentification
-    );
+    public function negotiate(SshPacketHandler $binaryPacketHandler, string $serverIdentification, string $clientIdentification);
 }

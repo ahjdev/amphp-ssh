@@ -25,8 +25,8 @@ function sshConnector(?SshConnector $connector = null): SshConnector
 }
 
 /**
- * @throws SshConnectException If the response received is invalid or is not a switching protocols (101) response.
  * @throws HttpException Thrown if the request fails.
+ * @throws SshConnectException If the response received is invalid or is not a switching protocols (101) response.
  */
 function connect(PsrUri|string $uri, SshAuthentication $authentication, ?Cancellation $cancellation = null, string $identification = 'SSH-2.0-AmpSSH_0.1'): SshResource {
     return sshConnector()->connect($uri, $authentication, $cancellation, $identification);
