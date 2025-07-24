@@ -1,68 +1,33 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh;
 
-use function Amp\call;
-use Amp\Promise;
-use Amp\Ssh\Authentication\Authentication;
-use Amp\Ssh\Authentication\AuthenticationFailureException;
-use Amp\Ssh\Channel\Dispatcher;
-use Amp\Ssh\Transport\LoggerHandler;
-use Amp\Ssh\Transport\MessageHandler;
-use Amp\Ssh\Transport\PayloadHandler;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Revolt\EventLoop;
+use Psr\Http\Message\UriInterface as PsrUri;
+use Amp\Ssh\Internal\Rfc4253Connector;
+use Amp\Http\Client\HttpException;
+use Amp\Cancellation;
 
-function connect(string $uri, Authentication $authentication, LoggerInterface $logger = null, string $identification = 'SSH-2.0-AmpSSH_0.1'): Promise {
-    return call(function () use ($uri, $authentication, $identification, $logger) {
-        $socket = yield \Amp\Socket\connect($uri);
-        $logger = $logger ?? new NullLogger();
+/**
+ * Set or access the global websocket Connector instance.
+ */
+function sshConnector(?SshConnector $connector = null): SshConnector
+{
+    static $map;
+    $map ??= new \WeakMap();
+    $driver = EventLoop::getDriver();
 
-        yield $socket->write($identification . "\r\n");
+    if ($connector) {
+        return $map[$driver] = $connector;
+    }
 
-        /*
-        The server MAY send other lines of data before sending the version
-        string.  Each line SHOULD be terminated by a Carriage Return and Line
-        Feed.  Such lines MUST NOT begin with "SSH-", and SHOULD be encoded
-        in ISO-10646 UTF-8 [RFC3629] (language is not specified).  Clients
-        MUST be able to process such lines.  Such lines MAY be silently
-        ignored, or MAY be displayed to the client user.
-        */
-        $serverIdentification = null;
-        $buffer = '';
+    return $map[$driver] ??= new Rfc4253Connector();
+}
 
-        while ($serverIdentification === null) {
-            $chunk = yield $socket->read();
-            if ($chunk === null) {
-                throw new AuthenticationFailureException('Could not read server identification: connection closed during read');
-            }
-
-            $buffer .= $chunk;
-
-            if (($linePos = \strpos($buffer, "\n")) !== false) {
-                $line = \substr($buffer, 0, $linePos);
-
-                if (\strpos($line, 'SSH-') === 0) {
-                    // OpenSSH before 7.5 does not always send CR before LF
-                    $serverIdentification = \rtrim($line, "\r");
-                }
-
-                $buffer = \substr($buffer, $linePos + 1);
-            }
-        }
-
-        $payloadHandler = new PayloadHandler($socket, $buffer);
-        $messageHandler = MessageHandler::create($payloadHandler);
-        $loggerHandler = new LoggerHandler($messageHandler, $logger);
-
-        $negotiator = Negotiator::create();
-        $cryptedHandler = yield $negotiator->negotiate($loggerHandler, $serverIdentification, $identification);
-
-        yield $authentication->authenticate($cryptedHandler, $negotiator->getSessionId());
-
-        $dispatcher = new Dispatcher($cryptedHandler);
-        $dispatcher->start();
-
-        return new SshResource($cryptedHandler, $dispatcher);
-    });
+/**
+ * @throws SshConnectException If the response received is invalid or is not a switching protocols (101) response.
+ * @throws HttpException Thrown if the request fails.
+ */
+function connect(PsrUri|string $uri, SshAuthentication $authentication, ?Cancellation $cancellation = null, string $identification = 'SSH-2.0-AmpSSH_0.1'): SshResource {
+    return sshConnector()->connect($uri, $authentication, $cancellation, $identification);
 }

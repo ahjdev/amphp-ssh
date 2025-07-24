@@ -1,8 +1,8 @@
 {
-    "name": "amphp/ssh",
-    "homepage": "https://github.com/amphp/ssh",
+    "name"       : "amphp/ssh",
+    "homepage"   : "https://github.com/amphp/ssh",
     "description": "Async SSH client for PHP based on Amp.",
-    "keywords": [
+    "keywords"   : [
         "ssh",
         "ssh2",
         "sftp",
@@ -17,25 +17,28 @@
         {
             "name": "Joel Wurtz",
             "email": "jwurtz@jolicode.com"
+        },
+        {
+            "name": "AmirHossein Jafari",
+            "email": "amirhosseinjafari8228@gmail.com"
         }
     ],
     "require": {
-        "ext-sodium": "*",
-        "amphp/socket": "^1.0",
-        "amphp/file": "^0.3",
-        "amphp/amp": "^2.0.3",
-        "psr/log": "^1.0"
+        "ext-sodium"   : "*",
+        "amphp/file"   : "^3",
+        "amphp/socket" : "^2.3",
+        "amphp/process": "^2.0",
+        "amphp/websocket-client" : "*",
+        "psr/log"      : "^3.0"
     },
     "require-dev": {
-        "amphp/phpunit-util": "^1",
-        "friendsofphp/php-cs-fixer": "^2.9",
-        "monolog/monolog": "^1.23",
-        "phpunit/phpunit": "^6.5"
+        "phpunit/phpunit"          : "^9",
+        "amphp/phpunit-util"       : "^3",
+        "amphp/php-cs-fixer-config": "^2"
     },
     "autoload": {
         "psr-4": {
-            "Amp\\Ssh\\": "src",
-            "Amp\\Ssh\\Tests\\": "tests"
+            "Amp\\Ssh\\": "src"
         },
         "files": [
             "src/functions.php",
@@ -43,12 +46,16 @@
             "src/KeyExchange/functions.php"
         ]
     },
-    "config": {
-        "sort-packages": true
+    "autoload-dev": {
+        "psr-4": {
+            "Amp\\Ssh\\Test\\": "tests"
+        }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
-        "test-coverage": "phpdbg -qrr vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml",
-        "lint": "vendor/bin/php-cs-fixer --diff --dry-run -v fix"
+        "check": [
+            "@code-style"
+        ],
+        "code-style": "php-cs-fixer fix -v --diff",
+        "test": "@php -dzend.assertions=1 -dassert.exception=1 ./vendor/bin/phpunit --coverage-text"
     }
 }
