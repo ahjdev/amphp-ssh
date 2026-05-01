@@ -1,0 +1,64 @@
+<?php declare(strict_types=1);
+
+namespace Amp\Ssh\Message;
+
+enum ChannelRequestPtyMode: int
+{
+    const TTY_OP_END = 0;
+    const VINTR = 1;
+    const VQUIT = 2;
+    const VERASE = 3;
+    const VKILL = 4;
+    const VEOF = 5;
+    const VEOL = 6;
+    const VEOL2 = 7;
+    const VSTART = 8;
+    const VSTOP = 9;
+    const VSUSP = 10;
+    const VDSUSP = 11;
+    const VREPRINT = 12;
+    const VWERASE = 13;
+    const VLNEXT = 14;
+    const VFLUSH = 15;
+    const VSWTCH = 16;
+    const VSTATUS = 17;
+    const VDISCARD = 18;
+    const IGNPAR = 30;
+    const PARMRK = 31;
+    const INPCK = 32;
+    const ISTRIP = 33;
+    const INLCR = 34;
+    const IGNCR = 35;
+    const ICRNL = 36;
+    const IUCLC = 37;
+    const IXON = 38;
+    const IXANY = 39;
+    const IXOFF = 40;
+    const IMAXBEL = 41;
+    const ISIG = 50;
+    const ICANON = 51;
+    const Xconst = 52;
+    const ECHO = 53;
+    const ECHOE = 54;
+    const ECHOK = 55;
+    const ECHONL = 56;
+    const NOFLSH = 57;
+    const TOSTOP = 58;
+    const IEXTEN = 59;
+    const ECHOCTL = 60;
+    const ECHOKE = 61;
+    const PENDIN = 62;
+    const OPOST = 70;
+    const OLCUC = 71;
+    const ONLCR = 72;
+    const OCRNL = 73;
+    const ONOCR = 74;
+    const ONLRET = 75;
+    const CS7 = 90;
+    const CS8 = 91;
+    const PARENB = 92;
+    const PARODD = 93;
+    const TTY_OP_ISPEED = 128;
+    const TTY_OP_OSPEED = 129;
+    const TTY_OP_NOT_DEFINED = 160;
+}

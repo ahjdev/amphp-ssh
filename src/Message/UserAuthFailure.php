@@ -1,37 +1,37 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_boolean;
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_namelist;
+use Amp\Ssh\SshMessage;
+use Amp\Ssh;
 
-/**
- * @internal
- */
-final class UserAuthFailure implements Message {
-    public $nextAuthentications;
+final class UserAuthFailure extends SshMessage
+{
+    public function __construct(public readonly array $nextAuthentications, public readonly bool $partialSuccess)
+    {
+    }
 
-    public $partialSuccess;
-
-    public function encode(): string {
+    public function encode(): string
+    {
+        $nextAuthentications = $this->toNameList($this->nextAuthentications);
         return \pack(
-            'C',
-            self::getNumber()
+            'C*Na*C',
+            self::getNumber(),
+            \strlen($nextAuthentications), $nextAuthentications,
+            $this->partialSuccess,
         );
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
+    public static function decode(): \Generator
+    {
+        $nextAuthentications = yield from Ssh\namelist();
+        $partialSuccess = yield from Ssh\boolean();
 
-        $message = new static;
-        $message->nextAuthentications = read_namelist($payload);
-        $message->partialSuccess = read_boolean($payload);
-
-        return $message;
+        return new static($nextAuthentications, $partialSuccess);
     }
 
-    public static function getNumber(): int {
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_USERAUTH_FAILURE;
     }
 }

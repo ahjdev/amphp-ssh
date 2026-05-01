@@ -1,36 +1,35 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_string;
+use Amp\Ssh\SshMessage;
+use Amp\Ssh;
 
-/**
- * @internal
- */
-final class UserAuthBanner implements Message {
-    public $message;
+final class UserAuthBanner extends SshMessage
+{
+    public function __construct(public readonly string $message, public readonly string $languageTag)
+    {
+    }
 
-    public $languageTag;
-
-    public function encode(): string {
+    public function encode(): string
+    {
         return \pack(
-            'C',
-            self::getNumber()
+            'C*Na*Na',
+            self::getNumber(),
+            \strlen($this->message), $this->message,
+            \strlen($this->languageTag), $this->languageTag,
         );
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
+    public static function decode(): \Generator
+    {
+        [$message, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
 
-        $message = new static;
-        $message->message = read_string($payload);
-        $message->languageTag = read_string($payload);
-
-        return $message;
+        return new self($message, $languageTag);
     }
 
-    public static function getNumber(): int {
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_USERAUTH_BANNER;
     }
 }

@@ -1,45 +1,39 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_boolean;
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_string;
+use Amp\Ssh;
+use Amp\Ssh\SshMessage;
 
-/**
- * @internal
- */
-final class Debug implements Message {
-    public $alwaysDisplay;
+final class Debug extends SshMessage
+{
+    public function __construct(
+        public readonly bool $alwaysDisplay,
+        public readonly string $message,
+        public readonly string $languageTag,
+    ) {
+    }
 
-    public $message;
-
-    public $languageTag;
-
-    public function encode(): string {
+    public function encode(): string
+    {
         return \pack(
-            'CCNa*Na*',
-            self::getNumber(),
-            $this->alwaysDisplay,
-            \strlen($this->message),
-            $this->message,
-            \strlen($this->languageTag),
-            $this->languageTag
+            'C2Na*Na*',
+            self::getNumber(), $this->alwaysDisplay,
+            \strlen($this->message), $this->message,
+            \strlen($this->languageTag), $this->languageTag
         );
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
+    public static function decode(): \Generator
+    {
+        $alwaysDisplay = yield from Ssh\boolean();
+        [$message, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
 
-        $message = new static;
-        $message->alwaysDisplay = read_boolean($payload);
-        $message->message = read_string($payload);
-        $message->languageTag = read_string($payload);
-
-        return $message;
+        return new static($alwaysDisplay, $message, $languageTag);
     }
 
-    public static function getNumber(): int {
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_DEBUG;
     }
 }

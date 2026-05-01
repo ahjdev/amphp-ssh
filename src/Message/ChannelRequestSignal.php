@@ -1,50 +1,26 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_string;
+use Amp\Ssh\Message\ChannelRequestType;
+use Amp\Ssh\Message\Signal;
+use Amp\Ssh\Message\ChannelRequest;
 
-/**
- * @internal
- */
-final class ChannelRequestSignal extends ChannelRequest {
-    public $signal;
+final class ChannelRequestSignal extends ChannelRequest
+{
+    public readonly Signal $signal;
 
-    private static $signalMapping = [
-        SIGABRT => 'ABRT',
-        SIGALRM => 'ALRM',
-        SIGFPE => 'FPE',
-        SIGHUP => 'HUP',
-        SIGILL => 'ILL',
-        SIGINT => 'INT',
-        SIGKILL => 'KILL',
-        SIGPIPE => 'PIPE',
-        SIGQUIT => 'QUIT',
-        SIGSEGV => 'SEGV',
-        SIGTERM => 'TERM',
-        SIGUSR1 => 'USR1',
-        SIGUSR2 => 'USR2',
-    ];
-
-    public $wantReply = false;
-
-    public function encode(): string {
-        $signal = \is_int($this->signal) ? self::$signalMapping[$this->signal] : $this->signal;
-
-        return parent::encode() . \pack(
-            'Na*',
-            \strlen($signal),
-            $signal
-        );
+    public function __construct(int $recipientChannel, int|Signal $signal, public readonly bool $coreDumped, public readonly string $errorMessage, public readonly string $languageTag)
+    {
+        parent::__construct($recipientChannel, false);
+        $this->type = ChannelRequestType::SIGNAL;
+        $this->signal = \is_int($signal) ? Signal::fromCode($signal) : $signal;
     }
 
-    public function getType() {
-        return self::TYPE_SIGNAL;
-    }
+    public function encode(): string
+    {
+        $signal = $this->signal->value;
 
-    protected function decodeExtraData($extraPayload) {
-        $signal = read_string($extraPayload);
-
-        $this->signal = \current(\array_keys(self::$signalMapping, $signal));
+        return parent::encode() . \pack('Na*', \strlen($signal), $signal);
     }
 }

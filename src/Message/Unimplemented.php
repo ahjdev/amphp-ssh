@@ -1,34 +1,30 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_uint32;
+use Amp\Ssh;
+use Amp\Ssh\SshMessage;
 
-/**
- * @internal
- */
-final class Unimplemented implements Message {
-    public $packetSequenceNumberRejected;
-
-    public function encode(): string {
-        return \pack(
-            'CN',
-            self::getNumber(),
-            $this->packetSequenceNumberRejected
-        );
+final class Unimplemented extends SshMessage
+{
+    public function __construct(public readonly int $seqNumber)
+    {
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
-
-        $message = new static;
-        $message->packetSequenceNumberRejected = read_uint32($payload);
-
-        return $message;
+    public function encode(): string
+    {
+        return \pack('CN', self::getNumber(), $this->seqNumber);
     }
 
-    public static function getNumber(): int {
+    public static function decode(): \Generator
+    {
+        $seqNumber = yield from Ssh\uint32();
+
+        return new static($seqNumber);
+    }
+
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_UNIMPLEMENTED;
     }
 }

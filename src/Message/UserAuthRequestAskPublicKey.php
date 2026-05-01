@@ -1,23 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-/**
- * @internal
- */
-final class UserAuthRequestAskPublicKey extends UserAuthRequest {
-    public $keyAlgorithm;
-
-    public $keyBlob;
-
-    protected function extraEncode(): string {
-        return \pack(
-            'CNa*Na*',
-            0,
-            \strlen($this->keyAlgorithm),
-            $this->keyAlgorithm,
-            \strlen($this->keyBlob),
-            $this->keyBlob
-        );
+final class UserAuthRequestAskPublicKey extends UserAuthRequestPublicKey
+{
+    public function hasSignature(): bool
+    {
+        return false;
     }
 }

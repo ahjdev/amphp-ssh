@@ -1,43 +1,39 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_string;
-use function Amp\Ssh\Transport\read_uint32;
+use Amp\Ssh;
+use Amp\Ssh\Message\Channel;
 
-/**
- * @internal
- */
-final class ChannelOpenFailure implements Message {
-    public $recipientChannel;
+final class ChannelOpenFailure extends Channel
+{
+    public function __construct(int $recipientChannel, public readonly int $reasonCode, public readonly string $description, public readonly string $languageTag)
+    {
+        parent::__construct($recipientChannel);
+    }
 
-    public $reasonCode;
-
-    public $description;
-
-    public $languageTag;
-
-    public function encode(): string {
-        return \pack(
-            'C',
-            self::getNumber()
+    public function encode(): string
+    {
+        return parent::encode() . \pack(
+            'N2a*Na*',
+            $this->reasonCode,
+            \strlen($this->description),
+            $this->description,
+            \strlen($this->languageTag),
+            $this->languageTag,
         );
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
+    public static function decode(): \Generator
+    {
+        [$recipient,   $reasonCode]  = yield from Ssh\times(2, Ssh\uint32(...));
+        [$description, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
 
-        $message = new static;
-        $message->recipientChannel = read_uint32($payload);
-        $message->reasonCode = read_uint32($payload);
-        $message->description = read_string($payload);
-        $message->languageTag = read_string($payload);
-
-        return $message;
+        return new static($recipient, $reasonCode, $description, $languageTag);
     }
 
-    public static function getNumber(): int {
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_CHANNEL_OPEN_FAILURE;
     }
 }

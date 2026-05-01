@@ -1,38 +1,31 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_uint32;
+use Amp\Ssh;
+use Amp\Ssh\Message\Channel;
 
-/**
- * @internal
- */
-final class ChannelWindowAdjust implements Message {
-    public $recipientChannel;
-
-    public $bytesToAdd;
-
-    public function encode(): string {
-        return \pack(
-            'CN2',
-            self::getNumber(),
-            $this->recipientChannel,
-            $this->bytesToAdd
-        );
+final class ChannelWindowAdjust extends Channel
+{
+    public function __construct(int $recipientChannel, public readonly int $windowIncrement)
+    {
+        parent::__construct($recipientChannel);
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
-
-        $message = new static;
-        $message->recipientChannel = read_uint32($payload);
-        $message->bytesToAdd = read_uint32($payload);
-
-        return $message;
+    public function encode(): string
+    {
+        return parent::encode() . \pack('N', $this->windowIncrement);
     }
 
-    public static function getNumber(): int {
+    public static function decode(): \Generator
+    {
+        [$channel, $bytesToAdd] = yield from Ssh\times(2, Ssh\uint32(...));
+
+        return new static($channel, $bytesToAdd);
+    }
+
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_CHANNEL_WINDOW_ADJUST;
     }
 }

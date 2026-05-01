@@ -1,41 +1,43 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-/**
- * @internal
- */
-final class ChannelOpen implements Message {
-    const TYPE_SESSION = 'session';
-    const TYPE_X11 = 'x11';
-    const TYPE_FORWARDED_TCPIP = 'forwarded-tcpip';
-    const TYPE_DIRECT_TCPIP = 'direct-tcpip';
+use Amp\Ssh;
+use Amp\Ssh\Message\ChannelType;
+use Amp\Ssh\SshMessage;
 
-    public $channelType;
+final class ChannelOpen extends SshMessage
+{
+    public function __construct(
+        private ChannelType $type,
+        private int $senderChannel,
+        private int $initialWindowSize = 0x7FFFFFFF,
+        private int $maximumPacketSize = 0x4000,
+    ) {
+    }
 
-    public $senderChannel;
+    public function encode(): string
+    {
+        $type = $this->type->value;
 
-    public $initialWindowSize = 0x7FFFFFFF;
-
-    public $maximumPacketSize = 0x4000;
-
-    public function encode(): string {
         return \pack(
             'CNa*N3',
             self::getNumber(),
-            \strlen($this->channelType),
-            $this->channelType,
-            $this->senderChannel,
-            $this->initialWindowSize,
-            $this->maximumPacketSize
+            \strlen($type), $type,
+            $this->senderChannel, $this->initialWindowSize, $this->maximumPacketSize
         );
     }
 
-    public static function decode(string $payload) {
-        return new static();
+    public static function decode(): \Generator
+    {
+        $type = yield from Ssh\string();
+        [$sender, $initWindowSize, $maxPacketSize] = yield from Ssh\times(3, Ssh\uint32(...));
+
+        return new static(ChannelType::from($type), $sender, $initWindowSize, $maxPacketSize);
     }
 
-    public static function getNumber(): int {
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_CHANNEL_OPEN;
     }
 }

@@ -1,42 +1,35 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_uint32;
+use Amp\Ssh;
+use Amp\Ssh\Message\Channel;
 
-/**
- * @internal
- */
-final class ChannelOpenConfirmation implements Message {
-    public $recipientChannel;
-
-    public $senderChannel;
-
-    public $initialWindowSize;
-
-    public $maximumPacketSize;
-
-    public function encode(): string {
-        return \pack(
-            'C',
-            self::getNumber()
-        );
+final class ChannelOpenConfirmation extends Channel
+{
+    public function __construct(
+        int $recipientChannel,
+        public readonly int $senderChannel,
+        public readonly int $initialWindowSize,
+        public readonly int $maximumPacketSize,
+    ) {
+        parent::__construct($recipientChannel);
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
-
-        $message = new static;
-        $message->recipientChannel = read_uint32($payload);
-        $message->senderChannel = read_uint32($payload);
-        $message->initialWindowSize = read_uint32($payload);
-        $message->maximumPacketSize = read_uint32($payload);
-
-        return $message;
+    public function encode(): string
+    {
+        return parent::encode() . \pack('N3', $this->senderChannel, $this->initialWindowSize, $this->maximumPacketSize);
     }
 
-    public static function getNumber(): int {
+    public static function decode(): \Generator
+    {
+        [$recipient, $sender, $initWindowSize, $maxPacketSize] = yield from Ssh\times(4, Ssh\uint32(...));
+
+        return new static($recipient, $sender, $initWindowSize, $maxPacketSize);
+    }
+
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_CHANNEL_OPEN_CONFIRMATION;
     }
 }

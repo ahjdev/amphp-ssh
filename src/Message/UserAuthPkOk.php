@@ -1,32 +1,34 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_string;
+use Amp\Ssh\SshMessage;
+use Amp\Ssh;
 
-/**
- * @internal
- */
-final class UserAuthPkOk implements Message {
-    private $keyAlgorithm;
-
-    private $keyBlob;
-
-    public function encode(): string {
+final class UserAuthPkOk extends SshMessage
+{
+    public function __construct(public readonly string $algorithm, public readonly string $blob)
+    {
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
-
-        $message = new static;
-        $message->keyAlgorithm = read_string($payload);
-        $message->keyBlob = read_string($payload);
-
-        return $message;
+    public function encode(): string
+    {
+        return \pack(
+            'C*Na*Na', self::getNumber(),
+            \strlen($this->algorithm), $this->algorithm,
+            \strlen($this->blob), $this->blob,
+        );
     }
 
-    public static function getNumber(): int {
+    public static function decode(): \Generator
+    {
+        [$algorithm, $blob] = yield from Ssh\times(2, Ssh\string(...));
+
+        return new static($algorithm, $blob);
+    }
+
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_USERAUTH_PK_OK;
     }
 }

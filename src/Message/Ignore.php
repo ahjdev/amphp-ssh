@@ -1,30 +1,30 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_string;
+use Amp\Ssh;
+use Amp\Ssh\SshMessage;
 
-/**
- * @internal
- */
-final class Ignore implements Message {
-    public $data;
+final class Ignore extends SshMessage
+{
+    public function __construct(public readonly string $data)
+    {
+    }
 
-    public function encode(): string {
+    public function encode(): string
+    {
         return \pack('CNa*', self::getNumber(), \strlen($this->data), $this->data);
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
+    public static function decode(): \Generator
+    {
+        $data = yield from Ssh\string();
 
-        $message = new static;
-        $message->data = read_string($payload);
-
-        return $message;
+        return new static($data);
     }
 
-    public static function getNumber(): int {
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_IGNORE;
     }
 }

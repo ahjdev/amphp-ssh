@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-/**
- * @internal
- */
-final class ChannelRequestShell extends ChannelRequest {
-    public function getType() {
-        return self::TYPE_SHELL;
-    }
+use Amp\Ssh\Message\ChannelRequestType;
+use Amp\Ssh\Message\ChannelRequest;
 
-    protected function decodeExtraData($extraPayload) {
+final class ChannelRequestShell extends ChannelRequest
+{
+    public function __construct(int $recipientChannel, bool $wantReply = true)
+    {
+        parent::__construct($recipientChannel, $wantReply);
+        $this->type = ChannelRequestType::SHELL;
     }
 }

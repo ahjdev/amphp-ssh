@@ -2,19 +2,12 @@
 
 namespace Amp\Ssh\Message;
 
-/**
- * @internal
- */
-final class NewKeys implements Message {
-    public function encode(): string {
-        return \pack('C', self::getNumber());
-    }
+use Amp\Ssh\SshMessage;
 
-    public static function decode(string $payload) {
-        return new static;
-    }
-
-    public static function getNumber(): int {
+final class NewKeys extends SshMessage
+{
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_NEWKEYS;
     }
 }

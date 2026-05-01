@@ -1,99 +1,79 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_boolean;
-use function Amp\Ssh\Transport\read_byte;
-use function Amp\Ssh\Transport\read_bytes;
-use function Amp\Ssh\Transport\read_namelist;
+use Amp\Ssh;
+use Amp\Ssh\SshMessage;
 
-/**
- * @internal
- */
-final class KeyExchangeInit implements Message {
-    public $cookie;
-    public $kexAlgorithms = [];
-    public $serverHostKeyAlgorithms = [];
-    public $encryptionAlgorithmsClientToServer = [];
-    public $encryptionAlgorithmsServerToClient = [];
-    public $macAlgorithmsClientToServer = [];
-    public $macAlgorithmsServerToClient = [];
-    public $compressionAlgorithmsClientToServer = [];
-    public $compressionAlgorithmsServerToClient = [];
-    public $languagesClientToServer = [];
-    public $languagesServerToClient = [];
-    public $firstKexPacketFollow = false;
+final class KeyExchangeInit extends SshMessage
+{
+    public readonly string $cookie;
 
-    public function encode(): string {
-        if (null === $this->cookie) {
-            $this->cookie = \random_bytes(16);
-        }
+    public function __construct(
+        ?string $cookie = null,
+        public readonly array $kex = [],
+        public readonly array $hostKey = [],
+        public readonly array $encryptC2S = [],
+        public readonly array $encryptS2C = [],
+        public readonly array $macC2S = [],
+        public readonly array $macS2C = [],
+        public readonly array $compressC2S = [],
+        public readonly array $compressS2C = [],
+        public readonly array $langC2S = [],
+        public readonly array $langS2C = [],
+        public readonly bool $firstPacket = false,
+    ) {
+        $this->cookie = $cookie ??= \random_bytes(16);
+    }
 
-        $nameListKex = $this->toNameList($this->kexAlgorithms);
-        $nameListServerHostKey = $this->toNameList($this->serverHostKeyAlgorithms);
-        $nameListEncryptionCToS = $this->toNameList($this->encryptionAlgorithmsClientToServer);
-        $nameListEncryptionSToC = $this->toNameList($this->encryptionAlgorithmsServerToClient);
-        $nameListMacCToS = $this->toNameList($this->macAlgorithmsClientToServer);
-        $nameListMacSToC = $this->toNameList($this->macAlgorithmsServerToClient);
-        $nameListCompressionCToS = $this->toNameList($this->compressionAlgorithmsClientToServer);
-        $nameListCompressionSToC = $this->toNameList($this->compressionAlgorithmsServerToClient);
-        $nameListLangCToS = $this->toNameList($this->languagesClientToServer);
-        $nameListLangSToC = $this->toNameList($this->languagesServerToClient);
+    public function encode(): string
+    {
+        $kex         = $this->toNameList($this->kex);
+        $hostKey     = $this->toNameList($this->hostKey);
+        $encryptC2S  = $this->toNameList($this->encryptC2S);
+        $encryptS2C  = $this->toNameList($this->encryptS2C);
+        $macC2S      = $this->toNameList($this->macC2S);
+        $macS2C      = $this->toNameList($this->macS2C);
+        $compressC2S = $this->toNameList($this->compressC2S);
+        $compressS2C = $this->toNameList($this->compressS2C);
+        $langC2S     = $this->toNameList($this->langC2S);
+        $langS2C     = $this->toNameList($this->langS2C);
 
         return \pack(
             'Ca*Na*Na*Na*Na*Na*Na*Na*Na*Na*Na*CN',
             self::getNumber(),
             $this->cookie,
-            \strlen($nameListKex),
-            $nameListKex,
-            \strlen($nameListServerHostKey),
-            $nameListServerHostKey,
-            \strlen($nameListEncryptionCToS),
-            $nameListEncryptionCToS,
-            \strlen($nameListEncryptionSToC),
-            $nameListEncryptionSToC,
-            \strlen($nameListMacCToS),
-            $nameListMacCToS,
-            \strlen($nameListMacSToC),
-            $nameListMacSToC,
-            \strlen($nameListCompressionCToS),
-            $nameListCompressionCToS,
-            \strlen($nameListCompressionSToC),
-            $nameListCompressionSToC,
-            \strlen($nameListLangCToS),
-            $nameListLangCToS,
-            \strlen($nameListLangSToC),
-            $nameListLangSToC,
-            $this->firstKexPacketFollow,
-            0
+            \strlen($kex), $kex,
+            \strlen($hostKey), $hostKey,
+            \strlen($encryptC2S), $encryptC2S,
+            \strlen($encryptS2C), $encryptS2C,
+            \strlen($macC2S), $macC2S,
+            \strlen($macS2C), $macS2C,
+            \strlen($compressC2S), $compressC2S,
+            \strlen($compressS2C), $compressS2C,
+            \strlen($langC2S), $langC2S,
+            \strlen($langS2C), $langS2C,
+            $this->firstPacket, 0
         );
     }
 
-    private function toNameList($value) {
-        return \implode(',', $value);
+    public static function decode(): \Generator
+    {
+        [
+            $kex, $hostKey,
+            $encryptC2S, $encryptS2C, $macC2S, $macS2C,
+            $compressC2S, $compressS2C, $langC2S, $langS2C,
+        ] = yield from Ssh\times(10, Ssh\namelist(...));
+
+        return new static(
+            $kex, $hostKey,
+            $encryptC2S, $encryptS2C, $macC2S, $macS2C,
+            $compressC2S, $compressS2C, $langC2S, $langS2C,
+        );
     }
 
-    public static function decode(string $payload) {
-        read_byte($payload);
-
-        $keyExchangeInit = new static();
-        $keyExchangeInit->cookie = read_bytes($payload, 16);
-        $keyExchangeInit->kexAlgorithms = read_namelist($payload);
-        $keyExchangeInit->serverHostKeyAlgorithms = read_namelist($payload);
-        $keyExchangeInit->encryptionAlgorithmsClientToServer = read_namelist($payload);
-        $keyExchangeInit->encryptionAlgorithmsServerToClient = read_namelist($payload);
-        $keyExchangeInit->macAlgorithmsClientToServer = read_namelist($payload);
-        $keyExchangeInit->macAlgorithmsServerToClient = read_namelist($payload);
-        $keyExchangeInit->compressionAlgorithmsClientToServer = read_namelist($payload);
-        $keyExchangeInit->compressionAlgorithmsServerToClient = read_namelist($payload);
-        $keyExchangeInit->languagesClientToServer = read_namelist($payload);
-        $keyExchangeInit->languagesServerToClient = read_namelist($payload);
-        $keyExchangeInit->firstKexPacketFollow = read_boolean($payload);
-
-        return $keyExchangeInit;
-    }
-
-    public static function getNumber(): int {
+    public static function getNumber(): int
+    {
         return self::SSH_MSG_KEXINIT;
     }
 }

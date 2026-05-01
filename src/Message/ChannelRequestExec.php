@@ -1,28 +1,19 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_string;
+use Amp\Ssh\Message\ChannelRequestType;
 
-/**
- * @internal
- */
-final class ChannelRequestExec extends ChannelRequest {
-    public $command;
-
-    public function encode(): string {
-        return parent::encode() . \pack(
-            'Na*',
-            \strlen($this->command),
-            $this->command
-        );
+final class ChannelRequestExec extends ChannelRequest
+{
+    public function __construct(int $recipientChannel, bool $wantReply = true, public readonly string $command)
+    {
+        parent::__construct($recipientChannel, $wantReply);
+        $this->type = ChannelRequestType::EXEC;
     }
 
-    public function getType() {
-        return self::TYPE_EXEC;
-    }
-
-    protected function decodeExtraData($extraPayload) {
-        $this->command = read_string($extraPayload);
+    public function encode(): string
+    {
+        return parent::encode() . \pack('Na*', \strlen($this->command), $this->command);
     }
 }

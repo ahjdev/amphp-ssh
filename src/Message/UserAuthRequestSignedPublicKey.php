@@ -1,38 +1,32 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-/**
- * @internal
- */
-final class UserAuthRequestSignedPublicKey extends UserAuthRequest {
-    public $keyAlgorithm;
+final class UserAuthRequestSignedPublicKey extends UserAuthRequestPublicKey
+{
+    public function __construct(
+        string $username,
+        string $algorithm,
+        string $blob,
+        private readonly ?string $signature = null,
+        string $serviceName = 'ssh-connection',
+    ) {
+        parent::__construct($username, $serviceName, $algorithm, $blob);
+    }
 
-    public $keyBlob;
+    public function hasSignature(): bool
+    {
+        return true;
+    }
 
-    public $signature;
+    public function encode(): string
+    {
+        $payload = parent::encode();
 
-    protected function extraEncode(): string {
-        if (null === $this->signature) {
-            return \pack(
-                'CNa*Na*',
-                1,
-                \strlen($this->keyAlgorithm),
-                $this->keyAlgorithm,
-                \strlen($this->keyBlob),
-                $this->keyBlob
-            );
+        if (!\empty($this->signature)) {
+            $payload .= \pack('Na*', \strlen($this->signature), $this->signature);
         }
 
-        return \pack(
-            'CNa*Na*Na*',
-            1,
-            \strlen($this->keyAlgorithm),
-            $this->keyAlgorithm,
-            \strlen($this->keyBlob),
-            $this->keyBlob,
-            \strlen($this->signature),
-            $this->signature
-        );
+        return $payload;
     }
 }

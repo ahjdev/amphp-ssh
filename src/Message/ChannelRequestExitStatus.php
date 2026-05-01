@@ -1,29 +1,20 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Amp\Ssh\Message;
 
-use function Amp\Ssh\Transport\read_uint32;
+use Amp\Ssh\Message\ChannelRequestType;
+use Amp\Ssh\Message\ChannelRequest;
 
-/**
- * @internal
- */
-final class ChannelRequestExitStatus extends ChannelRequest {
-    public $wantReply = false;
-
-    public $code;
-
-    public function encode(): string {
-        return parent::encode() . \pack(
-            'N',
-            $this->code
-        );
+final class ChannelRequestExitStatus extends ChannelRequest
+{
+    public function __construct(int $recipientChannel, public readonly int $code)
+    {
+        parent::__construct($recipientChannel, false);
+        $this->type = ChannelRequestType::EXIT_STATUS;
     }
 
-    public function getType() {
-        return self::TYPE_EXIT_STATUS;
-    }
-
-    protected function decodeExtraData($extraPayload) {
-        $this->code = read_uint32($extraPayload);
+    public function encode(): string
+    {
+        return parent::encode() . \pack('N', $this->code);
     }
 }
