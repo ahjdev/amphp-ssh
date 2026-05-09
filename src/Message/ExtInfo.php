@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class ExtInfo extends SshMessage implements \IteratorAggregate
 {
@@ -35,9 +36,9 @@ final class ExtInfo extends SshMessage implements \IteratorAggregate
         return new static($extensions);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_EXT_INFO;
+        return SshMessageType::SSH_MSG_EXT_INFO;
     }
 
     public function getIterator(): \Traversable

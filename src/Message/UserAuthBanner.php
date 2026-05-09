@@ -2,8 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh\SshMessage;
 use Amp\Ssh;
+use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class UserAuthBanner extends SshMessage
 {
@@ -15,7 +16,7 @@ final class UserAuthBanner extends SshMessage
     {
         return \pack(
             'C*Na*Na',
-            self::getNumber(),
+            self::getNumber()->value,
             \strlen($this->message), $this->message,
             \strlen($this->languageTag), $this->languageTag,
         );
@@ -28,8 +29,8 @@ final class UserAuthBanner extends SshMessage
         return new self($message, $languageTag);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_USERAUTH_BANNER;
+        return SshMessageType::SSH_MSG_USERAUTH_BANNER;
     }
 }

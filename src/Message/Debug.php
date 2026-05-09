@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class Debug extends SshMessage
 {
@@ -18,7 +19,7 @@ final class Debug extends SshMessage
     {
         return \pack(
             'C2Na*Na*',
-            self::getNumber(), $this->alwaysDisplay,
+            self::getNumber()->value, $this->alwaysDisplay,
             \strlen($this->message), $this->message,
             \strlen($this->languageTag), $this->languageTag
         );
@@ -32,8 +33,8 @@ final class Debug extends SshMessage
         return new static($alwaysDisplay, $message, $languageTag);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_DEBUG;
+        return SshMessageType::SSH_MSG_DEBUG;
     }
 }

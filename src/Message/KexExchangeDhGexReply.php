@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class KexExchangeDhGexReply extends SshMessage
 {
@@ -18,7 +19,7 @@ final class KexExchangeDhGexReply extends SshMessage
 
     public function encode(): string
     {
-        return \pack('CNa*Na*Na*', self::getNumber(), $this->hostKey, $this->fBytes, $this->signature);
+        return \pack('CNa*Na*Na*', self::getNumber()->value, $this->hostKey, $this->fBytes, $this->signature);
     }
 
     public static function decode(): \Generator
@@ -31,8 +32,8 @@ final class KexExchangeDhGexReply extends SshMessage
         return new static($hostKey, $fBytes, $signature);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_KEX_DH_GEX_REPLY;
+        return SshMessageType::SSH_MSG_KEX_DH_GEX_REPLY;
     }
 }

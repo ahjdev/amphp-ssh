@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshMessageType;
 
 final class ChannelOpenConfirmation extends Channel
 {
@@ -28,8 +29,8 @@ final class ChannelOpenConfirmation extends Channel
         return new static($recipient, $sender, $initWindowSize, $maxPacketSize);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_OPEN_CONFIRMATION;
+        return SshMessageType::SSH_MSG_CHANNEL_OPEN_CONFIRMATION;
     }
 }

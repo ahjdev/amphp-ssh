@@ -12,6 +12,7 @@ use Amp\Ssh\Message\ChannelRequestSignal;
 use Amp\Ssh\Message\ChannelRequestType;
 use Amp\Ssh\Message\ChannelRequestWindowChange;
 use Amp\Ssh\Message\Signal;
+use Amp\Ssh\SshMessageType;
 
 /**
  * @internal
@@ -29,7 +30,7 @@ abstract class ChannelRequest extends Channel
     {
         $type = $this->type->value;
 
-        return \pack('CN2a*C', self::getNumber(), $this->recipientChannel, \strlen($type), $type, $this->wantReply);
+        return \pack('CN2a*C', self::getNumber()->value, $this->recipientChannel, \strlen($type), $type, $this->wantReply);
     }
 
     public static function decode(): \Generator
@@ -99,8 +100,8 @@ abstract class ChannelRequest extends Channel
         return new ChannelRequestExitSignal($recipientChannel, $wantReply, $signal, $cordDumped, $errorMessage, $languageTag);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_REQUEST;
+        return SshMessageType::SSH_MSG_CHANNEL_REQUEST;
     }
 }

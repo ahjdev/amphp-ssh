@@ -8,6 +8,7 @@ use Amp\Ssh\Message\UserAuthRequestPassword;
 use Amp\Ssh\Message\UserAuthRequestSignedPublicKey;
 use Amp\Ssh\Message\UserAuthRequestType;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 abstract class UserAuthRequest extends SshMessage
 {
@@ -23,7 +24,7 @@ abstract class UserAuthRequest extends SshMessage
     {
         $type = $this->type->value;
         return \pack(
-            'C*Na*Na*Na', self::getNumber(),
+            'C*Na*Na*Na', self::getNumber()->value,
             \strlen($this->username), $this->username,
             \strlen($this->serviceName), $this->serviceName,
             \strlen($type), $type
@@ -53,8 +54,8 @@ abstract class UserAuthRequest extends SshMessage
         };
     }
 
-    final public static function getNumber(): int
+    final public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_USERAUTH_REQUEST;
+        return SshMessageType::SSH_MSG_USERAUTH_REQUEST;
     }
 }

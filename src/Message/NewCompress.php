@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class NewCompress extends SshMessage
 {
@@ -13,7 +14,7 @@ final class NewCompress extends SshMessage
 
     public function encode(): string
     {
-        return \pack('CNa*C', self::getNumber(), \strlen($this->algorithm), $this->algorithm, $this->clientCanAccept);
+        return \pack('CNa*C', self::getNumber()->value, \strlen($this->algorithm), $this->algorithm, $this->clientCanAccept);
     }
 
     public static function decode(): \Generator
@@ -24,8 +25,8 @@ final class NewCompress extends SshMessage
         return new static($algorithm, $clientCanAccept);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_NEWCOMPRESS;
+        return SshMessageType::SSH_MSG_NEWCOMPRESS;
     }
 }

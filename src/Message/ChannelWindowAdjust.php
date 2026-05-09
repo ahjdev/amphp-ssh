@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshMessageType;
 
 final class ChannelWindowAdjust extends Channel
 {
@@ -24,8 +25,8 @@ final class ChannelWindowAdjust extends Channel
         return new static($channel, $bytesToAdd);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_WINDOW_ADJUST;
+        return SshMessageType::SSH_MSG_CHANNEL_WINDOW_ADJUST;
     }
 }

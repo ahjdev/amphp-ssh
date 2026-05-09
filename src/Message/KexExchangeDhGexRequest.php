@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class KexDhGexRequest extends SshMessage
 {
@@ -26,8 +27,8 @@ final class KexDhGexRequest extends SshMessage
         return new self($min, $ideal, $max);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_KEX_DH_GEX_REQUEST;
+        return SshMessageType::SSH_MSG_KEX_DH_GEX_REQUEST;
     }
 }

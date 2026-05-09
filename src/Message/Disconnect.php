@@ -2,9 +2,10 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh\Message\DisconnectReason;
 use Amp\Ssh;
+use Amp\Ssh\Message\DisconnectReason;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class Disconnect extends SshMessage
 {
@@ -19,7 +20,7 @@ final class Disconnect extends SshMessage
     {
         return \pack(
             'CN2a*Na*',
-            self::getNumber(),
+            self::getNumber()->value,
             $this->reasonCode->value,
             \strlen($this->description), $this->description,
             \strlen($this->languageTag), $this->languageTag
@@ -34,8 +35,8 @@ final class Disconnect extends SshMessage
         return new static(DisconnectReason::from($reasonCode), $description, $languageTag);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_DISCONNECT;
+        return SshMessageType::SSH_MSG_DISCONNECT;
     }
 }

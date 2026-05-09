@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class Unimplemented extends SshMessage
 {
@@ -13,7 +14,7 @@ final class Unimplemented extends SshMessage
 
     public function encode(): string
     {
-        return \pack('CN', self::getNumber(), $this->seqNumber);
+        return \pack('CN', self::getNumber()->value, $this->seqNumber);
     }
 
     public static function decode(): \Generator
@@ -23,8 +24,8 @@ final class Unimplemented extends SshMessage
         return new static($seqNumber);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_UNIMPLEMENTED;
+        return SshMessageType::SSH_MSG_UNIMPLEMENTED;
     }
 }

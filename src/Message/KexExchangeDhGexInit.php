@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class KexExchangeDhGexInit extends SshMessage
 {
@@ -13,7 +14,7 @@ final class KexExchangeDhGexInit extends SshMessage
 
     public function encode(): string
     {
-        return \pack('CNa*', self::getNumber(), \strlen($this->exchange), $this->exchange);
+        return \pack('CNa*', self::getNumber()->value, \strlen($this->exchange), $this->exchange);
     }
 
     public static function decode(): \Generator
@@ -23,8 +24,8 @@ final class KexExchangeDhGexInit extends SshMessage
         return new static($exchange);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_KEX_DH_GEX_INIT;
+        return SshMessageType::SSH_MSG_KEX_DH_GEX_INIT;
     }
 }

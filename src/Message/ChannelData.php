@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshMessageType;
 
 final class ChannelData extends Channel
 {
@@ -25,8 +26,8 @@ final class ChannelData extends Channel
         return new static($channel, $data);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_DATA;
+        return SshMessageType::SSH_MSG_CHANNEL_DATA;
     }
 }

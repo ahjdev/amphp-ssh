@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 abstract class Channel extends SshMessage
 {
@@ -13,7 +14,7 @@ abstract class Channel extends SshMessage
 
     public function encode(): string
     {
-        return \pack('CN', self::getNumber(), $this->recipientChannel);
+        return \pack('CN', self::getNumber()->value, $this->recipientChannel);
     }
 
     public static function decode(): \Generator
@@ -23,8 +24,8 @@ abstract class Channel extends SshMessage
         return new static($channel);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_CLOSE;
+        return SshMessageType::SSH_MSG_CHANNEL_CLOSE;
     }
 }

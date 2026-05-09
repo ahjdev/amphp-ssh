@@ -2,8 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh\SshMessage;
 use Amp\Ssh;
+use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class UserAuthFailure extends SshMessage
 {
@@ -16,7 +17,7 @@ final class UserAuthFailure extends SshMessage
         $nextAuthentications = $this->toNameList($this->nextAuthentications);
         return \pack(
             'C*Na*C',
-            self::getNumber(),
+            self::getNumber()->value,
             \strlen($nextAuthentications), $nextAuthentications,
             $this->partialSuccess,
         );
@@ -30,8 +31,8 @@ final class UserAuthFailure extends SshMessage
         return new static($nextAuthentications, $partialSuccess);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_USERAUTH_FAILURE;
+        return SshMessageType::SSH_MSG_USERAUTH_FAILURE;
     }
 }

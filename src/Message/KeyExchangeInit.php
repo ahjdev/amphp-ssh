@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class KeyExchangeInit extends SshMessage
 {
@@ -41,7 +42,7 @@ final class KeyExchangeInit extends SshMessage
 
         return \pack(
             'Ca*Na*Na*Na*Na*Na*Na*Na*Na*Na*Na*CN',
-            self::getNumber(),
+            self::getNumber()->value,
             $this->cookie,
             \strlen($kex), $kex,
             \strlen($hostKey), $hostKey,
@@ -72,8 +73,8 @@ final class KeyExchangeInit extends SshMessage
         );
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_KEXINIT;
+        return SshMessageType::SSH_MSG_KEXINIT;
     }
 }

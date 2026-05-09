@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshMessageType;
 
 final class ChannelOpenFailure extends Channel
 {
@@ -32,8 +33,8 @@ final class ChannelOpenFailure extends Channel
         return new static($recipient, $reasonCode, $description, $languageTag);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_OPEN_FAILURE;
+        return SshMessageType::SSH_MSG_CHANNEL_OPEN_FAILURE;
     }
 }

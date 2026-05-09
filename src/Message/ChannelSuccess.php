@@ -3,11 +3,12 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshMessageType;
 
 final class ChannelSuccess extends Channel
 {
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_SUCCESS;
+        return SshMessageType::SSH_MSG_CHANNEL_SUCCESS;
     }
 }

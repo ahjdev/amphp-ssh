@@ -5,6 +5,7 @@ namespace Amp\Ssh\Message;
 use Amp\Ssh;
 use Amp\Ssh\Message\ChannelType;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class ChannelOpen extends SshMessage
 {
@@ -22,7 +23,7 @@ final class ChannelOpen extends SshMessage
 
         return \pack(
             'CNa*N3',
-            self::getNumber(),
+            self::getNumber()->value,
             \strlen($type), $type,
             $this->senderChannel, $this->initialWindowSize, $this->maximumPacketSize
         );
@@ -36,8 +37,8 @@ final class ChannelOpen extends SshMessage
         return new static(ChannelType::from($type), $sender, $initWindowSize, $maxPacketSize);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_CHANNEL_OPEN;
+        return SshMessageType::SSH_MSG_CHANNEL_OPEN;
     }
 }

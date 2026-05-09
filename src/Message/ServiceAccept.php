@@ -2,10 +2,12 @@
 
 namespace Amp\Ssh\Message;
 
+use Amp\Ssh\SshMessageType;
+
 final class ServiceAccept extends Service
 {
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_SERVICE_ACCEPT;
+        return SshMessageType::SSH_MSG_SERVICE_ACCEPT;
     }
 }

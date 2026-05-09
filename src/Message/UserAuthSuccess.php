@@ -3,11 +3,12 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class UserAuthSuccess extends SshMessage
 {
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_USERAUTH_SUCCESS;
+        return SshMessageType::SSH_MSG_USERAUTH_SUCCESS;
     }
 }

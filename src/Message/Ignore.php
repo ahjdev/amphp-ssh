@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\SshMessage;
+use Amp\Ssh\SshMessageType;
 
 final class Ignore extends SshMessage
 {
@@ -13,7 +14,7 @@ final class Ignore extends SshMessage
 
     public function encode(): string
     {
-        return \pack('CNa*', self::getNumber(), \strlen($this->data), $this->data);
+        return \pack('CNa*', self::getNumber()->value, \strlen($this->data), $this->data);
     }
 
     public static function decode(): \Generator
@@ -23,8 +24,8 @@ final class Ignore extends SshMessage
         return new static($data);
     }
 
-    public static function getNumber(): int
+    public static function getNumber(): SshMessageType
     {
-        return self::SSH_MSG_IGNORE;
+        return SshMessageType::SSH_MSG_IGNORE;
     }
 }
