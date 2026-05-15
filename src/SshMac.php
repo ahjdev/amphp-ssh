@@ -49,11 +49,12 @@ enum SshMac: string
                $this === self::HMAC_SHA2_256_ETM || $this === self::HMAC_SHA2_512_ETM;
     }
 
-    public function hash(string $data, string $key): string
+    public function hash(string $data, #[\SensitiveParameter] $key): string
     {
         if ($this === self::NONE) {
             return '';
         }
+
         $hash = \hash_hmac($this->getHashAlgorithm(), $data, $key, true);
 
         if ($this === self::HMAC_SHA1_96 || $this === self::HMAC_MD5_96) {
