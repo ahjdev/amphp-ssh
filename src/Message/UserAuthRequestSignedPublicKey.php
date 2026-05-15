@@ -8,7 +8,7 @@ final class UserAuthRequestSignedPublicKey extends UserAuthRequestPublicKey
         string $username,
         string $algorithm,
         string $blob,
-        private readonly ?string $signature = null,
+        private ?string $signature = null,
         string $serviceName = 'ssh-connection',
     ) {
         parent::__construct($username, $serviceName, $algorithm, $blob);
@@ -17,6 +17,12 @@ final class UserAuthRequestSignedPublicKey extends UserAuthRequestPublicKey
     public function hasSignature(): bool
     {
         return true;
+    }
+
+    public function setSignature(string $signature): self
+    {
+        $this->signature = $signature;
+        return $this;
     }
 
     public function encode(): string
