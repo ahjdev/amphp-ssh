@@ -1,9 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Amp\Ssh;
+namespace Amp\Ssh\Channel;
 
-interface SshProcess extends SshSession
+interface SshProcess extends SshChannel
 {
+    /**
+     * Starts the process.
+     */
+    public function start(): void;
+
     /**
      * Returns the command to execute.
      *

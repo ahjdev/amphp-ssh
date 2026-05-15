@@ -1,46 +1,34 @@
 <?php declare(strict_types=1);
 
-namespace Amp\Ssh;
+namespace Amp\Ssh\Channel;
 
-use Amp\Cancellation;
-use Amp\ByteStream\WritableStream;
 use Amp\ByteStream\ReadableStream;
-use Amp\Closable;
+use Amp\ByteStream\WritableStream;
+use Amp\Cancellation;
+use Amp\Ssh\SshException;
 
-interface SshSession extends Closable
+interface SshChannel
 {
     /**
-     * Starts a new session.
-     */
-    public function start(): void;
-
-    /**
-     * Wait for the session to end.
+     * Wait for the channel to end.
      *
      * @return int The process exit code.
      */
     public function join(?Cancellation $cancellation = null): int;
 
     /**
-     * Forcibly end the session.
+     * Forcibly end the channel.
      */
     public function kill(): void;
 
     /**
-     * Send a signal to the session.
+     * Send a signal to the channel.
      *
-     * @param int $signo Signal number to send to session.
+     * @param int $signo Signal number to send to channel.
      *
      * @throws SshException If signal sending is not supported.
      */
     public function signal(int $signo): void;
-
-    /**
-     * Gets the current working directory.
-     *
-     * @return string The working directory.
-     */
-    public function getWorkingDirectory(): string;
 
     /**
      * Gets the environment variables array.
@@ -50,22 +38,22 @@ interface SshSession extends Closable
     public function getEnvironment(): array;
 
     /**
-     * Determines if the session is still running.
+     * Determines if the channel is still running.
      */
     public function isRunning(): bool;
 
     /**
-     * Gets the session input stream (STDIN).
+     * Gets the channel input stream (STDIN).
      */
     public function getStdin(): WritableStream;
 
     /**
-     * Gets the session output stream (STDOUT).
+     * Gets the channel output stream (STDOUT).
      */
     public function getStdout(): ReadableStream;
 
     /**
-     * Gets the session error stream (STDERR).
+     * Gets the channel error stream (STDERR).
      */
     public function getStderr(): ReadableStream;
 }
