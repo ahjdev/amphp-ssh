@@ -2,9 +2,7 @@
 
 namespace Amp\Ssh;
 
-interface SshEncryption extends SshCryption
+interface SshEncryption
 {
     public function crypt(string $payload): string;
-
-    public function resetEncrypt(string $key, string $initIv): self;
 }
