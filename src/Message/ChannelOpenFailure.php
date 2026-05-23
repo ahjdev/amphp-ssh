@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
 
 final class ChannelOpenFailure extends Channel
@@ -13,27 +14,30 @@ final class ChannelOpenFailure extends Channel
         parent::__construct($recipientChannel);
     }
 
+    #[\Override]
     public function encode(): string
     {
         return parent::encode() . \pack(
             'N2a*Na*',
             $this->reasonCode,
-            \strlen($this->description),
-            $this->description,
-            \strlen($this->languageTag),
-            $this->languageTag,
+            \strlen($this->description), $this->description,
+            \strlen($this->languageTag), $this->languageTag,
         );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        [$recipient,   $reasonCode]  = yield from Ssh\times(2, Ssh\uint32(...));
-        [$description, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
+        $channel = $data->readInt();
+        $reasonCode = $data->readInt();
+        $description = $data->readString();
+        $languageTag = $data->readString();
 
-        return new static($recipient, $reasonCode, $description, $languageTag);
+        return new static($channel, $reasonCode, $description, $languageTag);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_OPEN_FAILURE;
     }

@@ -3,36 +3,51 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
-final class KeyExchangeCurveReply extends SshMessage
+class KeyExchangeDhReply extends SshMessage
 {
-    public function __construct(
-        public string $hostKey,
-        // public string $hostKeyFormat,
-        public string $fBytes,
-        public string $signature,
-        // public string $signatureFormat,
+    final public function __construct(
+        public readonly string $hostKey,
+        public readonly string $hostKeyFormat,
+        public readonly string $fBytes,
+        public readonly string $signature,
+        public readonly string $signatureFormat,
     ) {
     }
 
-    public function encode(): string
+    #[\Override]
+    final public function encode(): string
     {
-        return \pack('CNa*Na*Na*', self::getNumber()->value, $this->hostKey, $this->fBytes, $this->signature);
+        return \pack(
+            'CNa*Na*Na*',
+            self::getNumber(),
+            \strlen($this->hostKey), $this->hostKey,
+            \strlen($this->fBytes), $this->fBytes,
+            \strlen($this->signature), $this->signature,
+        );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    final public static function decode(SshBinary $data): self
     {
-        [$hostKey, $fBytes, $signature] = yield from Ssh\times(3, Ssh\string(...));
-        // $hostKeyFormat = $fullkey->read_string();
-        // $signatureFormat = (new Rfc4253PacketBinary($signature))->read_string();
-        // return new static($hostKey, $hostKeyFormat, $fBytes, $signature, $signatureFormat);
+        $hostKey   = $data->readString();
+        $fBytes    = $data->readString();
+        $signature = $data->readString();
+        //
+        $hostKeyFormat = new SshBinary($hostKey);
+        $hostKeyFormat = $hostKeyFormat->readString();
+        //
+        $signatureFormat = new SshBinary($signature);
+        $signatureFormat = $signatureFormat->readString();
 
-        return new static($hostKey, $fBytes, $signature);
+        return new static($hostKey, $hostKeyFormat, $fBytes, $signature, $signatureFormat);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_KEXDH_REPLY;
     }

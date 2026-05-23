@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 
 /**
@@ -14,10 +15,10 @@ abstract class Service extends SshMessage
     {
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $name = yield from Ssh\string();
-
+        $name = $data->readString();
         return new static($name);
     }
 }

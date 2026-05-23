@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\DisconnectReason;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -16,26 +17,30 @@ final class Disconnect extends SshMessage
     ) {
     }
 
+    #[\Override]
     public function encode(): string
     {
         return \pack(
             'CN2a*Na*',
-            self::getNumber()->value,
+            self::getNumber(),
             $this->reasonCode->value,
             \strlen($this->description), $this->description,
             \strlen($this->languageTag), $this->languageTag
         );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $reasonCode  = yield from Ssh\uint32();
-        [$description, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
+        $reasonCode  = $data->readInt();
+        $description = $data->readString();
+        $languageTag = $data->readString();
 
         return new static(DisconnectReason::from($reasonCode), $description, $languageTag);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_DISCONNECT;
     }

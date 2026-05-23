@@ -2,29 +2,31 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
-final class KeyExchangeCurveInit extends SshMessage
+class KeyExchangeDhInit extends SshMessage
 {
-    public function __construct(public readonly string $exchange)
+    final public function __construct(public readonly string $exchange)
     {
     }
 
-    public function encode(): string
+    #[\Override]
+    final public function encode(): string
     {
-        return \pack('CNa*', self::getNumber()->value, \strlen($this->exchange), $this->exchange);
+        return \pack('CNa*', self::getNumber(), \strlen($this->exchange), $this->exchange);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    final public static function decode(SshBinary $data): self
     {
-        $exchange = yield from Ssh\string();
-
+        $exchange = $data->readString();
         return new static($exchange);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_KEXDH_INIT;
     }

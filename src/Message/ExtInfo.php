@@ -3,15 +3,17 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
 final class ExtInfo extends SshMessage implements \IteratorAggregate
 {
-    public function __construct(private readonly array $extensions = [])
+    public function __construct(public readonly array $extensions = [])
     {
     }
 
+    #[\Override]
     public function encode(): string
     {
         $payload  = parent::encode();
@@ -24,19 +26,20 @@ final class ExtInfo extends SshMessage implements \IteratorAggregate
         return $payload;
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $count = yield from Ssh\uint32();
+        $count = $data->readInt();
         $extensions = [];
         for ($i = 0; $i < $count; $i++) {
-            [$name, $value] = yield from Ssh\times(2, Ssh\string(...));
-            $extensions[$name] = $value;
+            $extensions[$data->readString()] = $data->readString();
         }
 
         return new static($extensions);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_EXT_INFO;
     }

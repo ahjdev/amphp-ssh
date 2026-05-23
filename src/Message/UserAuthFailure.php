@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -12,26 +13,29 @@ final class UserAuthFailure extends SshMessage
     {
     }
 
+    #[\Override]
     public function encode(): string
     {
         $nextAuthentications = $this->toNameList($this->nextAuthentications);
         return \pack(
             'C*Na*C',
-            self::getNumber()->value,
+            self::getNumber(),
             \strlen($nextAuthentications), $nextAuthentications,
             $this->partialSuccess,
         );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $nextAuthentications = yield from Ssh\namelist();
-        $partialSuccess = yield from Ssh\boolean();
+        $nextAuthentications = $data->readNamelist();
+        $partialSuccess = $data->readBoolean();
 
         return new static($nextAuthentications, $partialSuccess);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_USERAUTH_FAILURE;
     }

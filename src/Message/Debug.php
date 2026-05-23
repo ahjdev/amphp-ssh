@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -15,25 +16,29 @@ final class Debug extends SshMessage
     ) {
     }
 
+    #[\Override]
     public function encode(): string
     {
         return \pack(
             'C2Na*Na*',
-            self::getNumber()->value, $this->alwaysDisplay,
+            self::getNumber(), $this->alwaysDisplay,
             \strlen($this->message), $this->message,
             \strlen($this->languageTag), $this->languageTag
         );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $alwaysDisplay = yield from Ssh\boolean();
-        [$message, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
+        $alwaysDisplay = $data->readBoolean();
+        $message       = $data->readString();
+        $languageTag   = $data->readString();
 
         return new static($alwaysDisplay, $message, $languageTag);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_DEBUG;
     }

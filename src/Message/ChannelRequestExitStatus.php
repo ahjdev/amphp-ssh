@@ -13,6 +13,7 @@ final class ChannelRequestExitStatus extends ChannelRequest
         $this->type = ChannelRequestType::EXIT_STATUS;
     }
 
+    #[\Override]
     public function encode(): string
     {
         return parent::encode() . \pack('N', $this->code);

@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -12,19 +13,21 @@ abstract class Channel extends SshMessage
     {
     }
 
+    #[\Override]
     public function encode(): string
     {
-        return \pack('CN', self::getNumber()->value, $this->recipientChannel);
+        return \pack('CN', self::getNumber(), $this->recipientChannel);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $channel = yield from Ssh\uint32();
-
-        return new static($channel);
+        $recipientChannel = $data->readInt();
+        return new static($recipientChannel);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_CLOSE;
     }

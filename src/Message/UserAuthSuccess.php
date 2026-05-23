@@ -7,7 +7,8 @@ use Amp\Ssh\SshMessageType;
 
 final class UserAuthSuccess extends SshMessage
 {
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_USERAUTH_SUCCESS;
     }

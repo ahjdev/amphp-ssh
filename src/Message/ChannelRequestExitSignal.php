@@ -10,13 +10,20 @@ final class ChannelRequestExitSignal extends ChannelRequest
 {
     public readonly Signal $signal;
 
-    public function __construct(int $recipientChannel, bool $wantReply = true, int|Signal $signal, public readonly bool $coreDumped, public readonly string $errorMessage, public readonly string $languageTag)
-    {
+    public function __construct(
+        int $recipientChannel,
+        int|Signal $signal,
+        public readonly bool $coreDumped,
+        public readonly string $errorMessage,
+        public readonly string $languageTag,
+        bool $wantReply = true
+    ) {
         parent::__construct($recipientChannel, $wantReply);
         $this->type = ChannelRequestType::EXIT_SIGNAL;
         $this->signal = \is_int($signal) ? Signal::fromCode($signal) : $signal;
     }
 
+    #[\Override]
     public function encode(): string
     {
         $signal = $this->signal->value;
@@ -26,7 +33,7 @@ final class ChannelRequestExitSignal extends ChannelRequest
             \strlen($signal), $signal,
             $this->coreDumped,
             \strlen($this->errorMessage), $this->errorMessage,
-            \strlen($this->languageTag), $this->languageTag,
+            \strlen($this->languageTag),  $this->languageTag,
         );
     }
 }

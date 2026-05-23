@@ -6,18 +6,19 @@ final class ChannelRequestPty extends ChannelRequest
 {
     public function __construct(
         int $recipientChannel,
-        bool $wantReply = true,
-        public readonly string $term = 'xterm',
         public readonly int $columns,
         public readonly int $rows,
-        public readonly int $width,
-        public readonly int $height,
-        public readonly array $modes,
+        public readonly int $width = 0,
+        public readonly int $height = 0,
+        public readonly array $modes = [],
+        public readonly string $term = 'xterm',
+        bool $wantReply = true,
     ) {
         parent::__construct($recipientChannel, $wantReply);
         $this->type = ChannelRequestType::PTY;
     }
 
+    #[\Override]
     public function encode(): string
     {
         $modes = '';

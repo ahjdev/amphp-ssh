@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\ChannelType;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -17,27 +18,32 @@ final class ChannelOpen extends SshMessage
     ) {
     }
 
+    #[\Override]
     public function encode(): string
     {
         $type = $this->type->value;
 
         return \pack(
             'CNa*N3',
-            self::getNumber()->value,
+            self::getNumber(),
             \strlen($type), $type,
             $this->senderChannel, $this->initialWindowSize, $this->maximumPacketSize
         );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $type = yield from Ssh\string();
-        [$sender, $initWindowSize, $maxPacketSize] = yield from Ssh\times(3, Ssh\uint32(...));
+        $type = $data->readString();
+        $sender = $data->readInt();
+        $initWindowSize = $data->readInt();
+        $maxPacketSize = $data->readInt();
 
         return new static(ChannelType::from($type), $sender, $initWindowSize, $maxPacketSize);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_OPEN;
     }

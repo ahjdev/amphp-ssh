@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
 
 final class ChannelWindowAdjust extends Channel
@@ -13,19 +14,23 @@ final class ChannelWindowAdjust extends Channel
         parent::__construct($recipientChannel);
     }
 
+    #[\Override]
     public function encode(): string
     {
         return parent::encode() . \pack('N', $this->windowIncrement);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        [$channel, $bytesToAdd] = yield from Ssh\times(2, Ssh\uint32(...));
+        $channel    = $data->readInt();
+        $bytesToAdd = $data->readInt();
 
         return new static($channel, $bytesToAdd);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_WINDOW_ADJUST;
     }

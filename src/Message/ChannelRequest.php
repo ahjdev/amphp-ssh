@@ -2,7 +2,6 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
 use Amp\Ssh\Message\ChannelRequestExitSignal;
 use Amp\Ssh\Message\ChannelRequestExitStatus;
@@ -12,6 +11,7 @@ use Amp\Ssh\Message\ChannelRequestSignal;
 use Amp\Ssh\Message\ChannelRequestType;
 use Amp\Ssh\Message\ChannelRequestWindowChange;
 use Amp\Ssh\Message\Signal;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
 
 /**
@@ -26,81 +26,77 @@ abstract class ChannelRequest extends Channel
         parent::__construct($recipientChannel);
     }
 
-    public function encode(): string 
+    #[\Override]
+    public function encode(): string
     {
         $type = $this->type->value;
 
-        return \pack('CN2a*C', self::getNumber()->value, $this->recipientChannel, \strlen($type), $type, $this->wantReply);
+        return parent::encode() . \pack('Na*C', \strlen($type), $type, $this->wantReply);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $recipientChannel = yield from Ssh\uint32();
-        $type = yield from Ssh\string();
-        $type = ChannelRequestType::from($type);
-        $wantReply = yield from Ssh\boolean();
-
-        if ($type === ChannelRequestType::SHELL) {
-            return new ChannelRequestShell($recipientChannel, $wantReply);
-        }
-
-        if ($type === ChannelRequestType::EXEC) {
-            $command = yield from Ssh\string();
-            return new ChannelRequestExec($recipientChannel, $wantReply, $command);
-        }
-
-        if ($type === ChannelRequestType::EXIT_STATUS) {
-            $code = yield from Ssh\uint32();
-            return new ChannelRequestExitStatus($recipientChannel, $code);
-        }
-
-        if ($type === ChannelRequestType::ENV) {
-            [$name, $value] = yield from Ssh\times(4, Ssh\string(...));
-            return new ChannelRequestEnv($recipientChannel, $wantReply, $name, $value);
-        }
-
-        if ($type === ChannelRequestType::WINDOW_CHANGE) {
-            [$columns, $rows, $width, $height] = yield from Ssh\times(4, Ssh\uint32(...));
-            return new ChannelRequestWindowChange($recipientChannel, $columns, $rows, $width, $height);
-        }
+        $recipientChannel = $data->readInt();
+        $type = ChannelRequestType::from($data->readString());
+        $wantReply = $data->readBoolean();
 
         if ($type === ChannelRequestType::PTY) {
-            $term = yield from Ssh\string();
-            [$columns, $rows, $width, $height] = yield from Ssh\times(4, Ssh\uint32(...));
-            $mode = yield from Ssh\string();
+            $term    = $data->readString();
+            $columns = $data->readInt();
+            $rows    = $data->readInt();
+            $width   = $data->readInt();
+            $height  = $data->readInt();
             $modes = [];
-            // todo: make it better
-            while (\strlen($mode) > 0) {
-                $id = \unpack('C', $mode)[1];
-                $mode = \substr($mode, 1);
-
-                if (
-                    $id === ChannelRequestPtyMode::TTY_OP_END ||
-                    $id >= ChannelRequestPtyMode::TTY_OP_NOT_DEFINED
-                ) {
+            $mode = new SshBinary($data->readString());
+            while ($mode->isReadable()) {
+                $id = $mode->readByte();
+                if ($id === ChannelRequestPtyMode::TTY_OP_END || $id >= ChannelRequestPtyMode::TTY_OP_NOT_DEFINED) {
                     break;
                 }
-                $value = \unpack('N', $mode)[1];
-                $mode  = \substr($mode, 4);
-                $modes[$id] = $value;
+                $modes[$id] = $mode->readInt();
             }
-
-            return new ChannelRequestPty($recipientChannel, $wantReply, $term, $columns, $rows, $width, $height, $modes);
+            return new ChannelRequestPty($recipientChannel, $columns, $rows, $width, $height, $modes, $term, $wantReply);
         }
 
-        $signal = yield from Ssh\string();
-        $signal = Signal::from($signal);
-        $cordDumped = yield from Ssh\boolean();
-        [$errorMessage, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
-
-        if ($type === ChannelRequestType::SIGNAL) {
-            return new ChannelRequestSignal($recipientChannel, $signal, $cordDumped, $errorMessage, $languageTag);
-        }
-
-        return new ChannelRequestExitSignal($recipientChannel, $wantReply, $signal, $cordDumped, $errorMessage, $languageTag);
+        return match ($type) {
+            ChannelRequestType::SHELL => new ChannelRequestShell($recipientChannel, $wantReply),
+            ChannelRequestType::EXEC  => new ChannelRequestExec(
+                $recipientChannel,
+                wantReply: $wantReply,
+                command  : $data->readString()
+            ),
+            ChannelRequestType::EXIT_STATUS => new ChannelRequestExitStatus(
+                $recipientChannel,
+                code: $data->readInt()
+            ),
+            ChannelRequestType::SIGNAL => new ChannelRequestSignal(
+                $recipientChannel,
+                signal: Signal::from($data->readString())
+            ),
+            ChannelRequestType::EXIT_SIGNAL => new ChannelRequestExitSignal(
+                $recipientChannel,
+                wantReply   : $wantReply,
+                coreDumped  : $data->readBoolean(),
+                errorMessage: $data->readString(),
+                languageTag : $data->readString(),
+                signal      : Signal::from($data->readString()),
+            ),
+            ChannelRequestType::ENV => new ChannelRequestEnv(
+                $recipientChannel,
+                wantReply: $wantReply,
+                name     : $data->readString(), value: $data->readString()
+            ),
+            ChannelRequestType::WINDOW_CHANGE => new ChannelRequestWindowChange(
+                $recipientChannel,
+                columns: $data->readInt(), rows  : $data->readInt(),
+                width  : $data->readInt(), height: $data->readInt(),
+            ),
+        };
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_REQUEST;
     }

@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
 
 final class ChannelExtendedData extends Channel
@@ -20,15 +21,16 @@ final class ChannelExtendedData extends Channel
         return parent::encode() . \pack('N2a*', $this->type, \strlen($this->data), $this->data);
     }
 
-    public static function decode(): \Generator
+    public static function decode(SshBinary $data): self
     {
-        [$channel, $type] = yield from Ssh\times(2, Ssh\uint32(...));
-        $data = yield from Ssh\string();
+        $recipientChannel = $data->readInt();
+        $type = $data->readInt();
+        $data = $data->readString();
 
-        return new static($channel, $type, $data);
+        return new static($recipientChannel, $type, $data);
     }
 
-    public static function getNumber(): SshMessageType
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_EXTENDED_DATA;
     }

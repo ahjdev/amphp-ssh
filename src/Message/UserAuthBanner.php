@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -12,24 +13,28 @@ final class UserAuthBanner extends SshMessage
     {
     }
 
+    #[\Override]
     public function encode(): string
     {
         return \pack(
             'C*Na*Na',
-            self::getNumber()->value,
+            self::getNumber(),
             \strlen($this->message), $this->message,
             \strlen($this->languageTag), $this->languageTag,
         );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        [$message, $languageTag] = yield from Ssh\times(2, Ssh\string(...));
+        $message = $data->readString();
+        $languageTag = $data->readString();
 
         return new self($message, $languageTag);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_USERAUTH_BANNER;
     }

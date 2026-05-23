@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -12,19 +13,21 @@ final class Ignore extends SshMessage
     {
     }
 
+    #[\Override]
     public function encode(): string
     {
-        return \pack('CNa*', self::getNumber()->value, \strlen($this->data), $this->data);
+        return \pack('CNa*', self::getNumber(), \strlen($this->data), $this->data);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $data = yield from Ssh\string();
-
+        $data = $data->readString();
         return new static($data);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_IGNORE;
     }

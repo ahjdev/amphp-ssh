@@ -18,6 +18,7 @@ final class ChannelRequestWindowChange extends ChannelRequest
         $this->type = ChannelRequestType::WINDOW_CHANGE;
     }
 
+    #[\Override]
     public function encode(): string
     {
         return parent::encode() . \pack('N4', $this->columns, $this->rows, $this->width, $this->height);

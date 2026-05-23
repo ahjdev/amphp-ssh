@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
 
 final class ChannelOpenConfirmation extends Channel
@@ -17,19 +18,25 @@ final class ChannelOpenConfirmation extends Channel
         parent::__construct($recipientChannel);
     }
 
+    #[\Override]
     public function encode(): string
     {
         return parent::encode() . \pack('N3', $this->senderChannel, $this->initialWindowSize, $this->maximumPacketSize);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        [$recipient, $sender, $initWindowSize, $maxPacketSize] = yield from Ssh\times(4, Ssh\uint32(...));
+        $recipient = $data->readInt();
+        $sender = $data->readInt();
+        $initWindowSize = $data->readInt();
+        $maxPacketSize  = $data->readInt();
 
         return new static($recipient, $sender, $initWindowSize, $maxPacketSize);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_OPEN_CONFIRMATION;
     }

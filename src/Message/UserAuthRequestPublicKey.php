@@ -18,6 +18,7 @@ abstract class UserAuthRequestPublicKey extends UserAuthRequest
         $this->type = UserAuthRequestType::PUBLIC_KEY;
     }
 
+    #[\Override]
     public function encode(): string
     {
         $payload  = parent::encode();

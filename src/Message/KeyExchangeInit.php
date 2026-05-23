@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -27,6 +28,7 @@ final class KeyExchangeInit extends SshMessage
         $this->cookie = $cookie ??= \random_bytes(16);
     }
 
+    #[\Override]
     public function encode(): string
     {
         $kex         = $this->toNameList($this->kex);
@@ -42,7 +44,7 @@ final class KeyExchangeInit extends SshMessage
 
         return \pack(
             'Ca*Na*Na*Na*Na*Na*Na*Na*Na*Na*Na*CN',
-            self::getNumber()->value,
+            self::getNumber(),
             $this->cookie,
             \strlen($kex), $kex,
             \strlen($hostKey), $hostKey,
@@ -58,13 +60,23 @@ final class KeyExchangeInit extends SshMessage
         );
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        [
-            $kex, $hostKey,
-            $encryptC2S, $encryptS2C, $macC2S, $macS2C,
-            $compressC2S, $compressS2C, $langC2S, $langS2C,
-        ] = yield from Ssh\times(10, Ssh\namelist(...));
+        $kex = $data->readString();
+        $hostKey = $data->readNamelist();
+        // Encryption
+        $encryptC2S = $data->readNamelist();
+        $encryptS2C = $data->readNamelist();
+        // Mac
+        $macC2S = $data->readNamelist();
+        $macS2C = $data->readNamelist();
+        // Compress
+        $compressC2S = $data->readNamelist();
+        $compressS2C = $data->readNamelist();
+        // Lang
+        $langC2S = $data->readNamelist();
+        $langS2C = $data->readNamelist();
 
         return new static(
             $kex, $hostKey,
@@ -73,7 +85,8 @@ final class KeyExchangeInit extends SshMessage
         );
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_KEXINIT;
     }

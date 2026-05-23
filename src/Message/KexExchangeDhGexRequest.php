@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -15,19 +16,24 @@ final class KexDhGexRequest extends SshMessage
     ) {
     }
 
+    #[\Override]
     public function encode(): string
     {
         return parent::encode() . pack('N3', $this->min, $this->ideal, $this->max);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        [$min, $ideal, $max] = yield from Ssh\times(3, Ssh\uint32(...));
+        $min   = $data->readInt();
+        $ideal = $data->readInt();
+        $max   = $data->readInt();
 
-        return new self($min, $ideal, $max);
+        return new static($min, $ideal, $max);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_KEX_DH_GEX_REQUEST;
     }

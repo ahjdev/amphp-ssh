@@ -4,6 +4,7 @@ namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
 
 final class ChannelData extends Channel
@@ -13,20 +14,23 @@ final class ChannelData extends Channel
         parent::__construct($recipientChannel);
     }
 
+    #[\Override]
     public function encode(): string
     {
         return parent::encode() . \pack('Na*', \strlen($this->data), $this->data);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $channel = yield from Ssh\uint32();
-        $data    = yield from Ssh\string();
+        $recipientChannel = $data->readInt();
+        $data = $data->readString();
 
-        return new static($channel, $data);
+        return new static($recipientChannel, $data);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_CHANNEL_DATA;
     }

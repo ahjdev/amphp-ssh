@@ -14,6 +14,7 @@ final class UserAuthRequestSignedPublicKey extends UserAuthRequestPublicKey
         parent::__construct($username, $serviceName, $algorithm, $blob);
     }
 
+    #[\Override]
     public function hasSignature(): bool
     {
         return true;
@@ -25,6 +26,7 @@ final class UserAuthRequestSignedPublicKey extends UserAuthRequestPublicKey
         return $this;
     }
 
+    #[\Override]
     public function encode(): string
     {
         $payload = parent::encode();

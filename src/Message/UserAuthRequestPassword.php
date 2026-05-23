@@ -16,6 +16,7 @@ final class UserAuthRequestPassword extends UserAuthRequest
         $this->type = UserAuthRequestType::PASSWORD;
     }
 
+    #[\Override]
     public function encode(): string
     {
         $payload  = parent::encode();

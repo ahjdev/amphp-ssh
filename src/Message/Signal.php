@@ -29,7 +29,6 @@ enum Signal: string
     public static function fromCode(int $code): self
     {
         return match ($code) {
-
             // Exit Signals (RFC 4254, Section 6.10)
             6  => self::SIGABRT, // SIGABRT
             14 => self::SIGALRM, // SIGALRM

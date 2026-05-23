@@ -3,6 +3,7 @@
 namespace Amp\Ssh\Message;
 
 use Amp\Ssh;
+use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
@@ -12,20 +13,23 @@ final class NewCompress extends SshMessage
     {
     }
 
+    #[\Override]
     public function encode(): string
     {
-        return \pack('CNa*C', self::getNumber()->value, \strlen($this->algorithm), $this->algorithm, $this->clientCanAccept);
+        return \pack('CNa*C', self::getNumber(), \strlen($this->algorithm), $this->algorithm, $this->clientCanAccept);
     }
 
-    public static function decode(): \Generator
+    #[\Override]
+    public static function decode(SshBinary $data): self
     {
-        $algorithm = yield from Ssh\string();
-        $clientCanAccept = yield from Ssh\boolean();
+        $algorithm = $data->readString();
+        $clientCanAccept = $data->readBoolean();
 
         return new static($algorithm, $clientCanAccept);
     }
 
-    public static function getNumber(): SshMessageType
+    #[\Override]
+    public static function getType(): SshMessageType
     {
         return SshMessageType::SSH_MSG_NEWCOMPRESS;
     }
