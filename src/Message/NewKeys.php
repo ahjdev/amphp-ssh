@@ -10,6 +10,6 @@ final class NewKeys extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_NEWKEYS;
+        return SshMessageType::NEWKEYS;
     }
 }

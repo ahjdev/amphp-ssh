@@ -37,11 +37,9 @@ class KeyExchangeDhReply extends SshMessage
         $fBytes    = $data->readString();
         $signature = $data->readString();
         //
-        $hostKeyFormat = new SshBinary($hostKey);
-        $hostKeyFormat = $hostKeyFormat->readString();
+        $hostKeyFormat = (new SshBinary($hostKey))->readString();
         //
-        $signatureFormat = new SshBinary($signature);
-        $signatureFormat = $signatureFormat->readString();
+        $signatureFormat = (new SshBinary($signature))->readString();
 
         return new static($hostKey, $hostKeyFormat, $fBytes, $signature, $signatureFormat);
     }
@@ -49,6 +47,6 @@ class KeyExchangeDhReply extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_KEXDH_REPLY;
+        return SshMessageType::KEX_ECDH_REPLY;
     }
 }

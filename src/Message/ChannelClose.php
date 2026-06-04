@@ -10,6 +10,6 @@ final class ChannelClose extends Channel
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_CLOSE;
+        return SshMessageType::CHANNEL_CLOSE;
     }
 }

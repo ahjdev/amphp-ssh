@@ -32,6 +32,6 @@ final class ChannelExtendedData extends Channel
 
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_EXTENDED_DATA;
+        return SshMessageType::CHANNEL_EXTENDED_DATA;
     }
 }

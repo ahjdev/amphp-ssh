@@ -40,6 +40,6 @@ final class Debug extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_DEBUG;
+        return SshMessageType::DEBUG;
     }
 }

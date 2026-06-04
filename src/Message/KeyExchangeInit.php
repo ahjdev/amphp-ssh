@@ -88,6 +88,6 @@ final class KeyExchangeInit extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_KEXINIT;
+        return SshMessageType::KEXINIT;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
@@ -32,6 +31,6 @@ final class ChannelData extends Channel
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_DATA;
+        return SshMessageType::CHANNEL_DATA;
     }
 }

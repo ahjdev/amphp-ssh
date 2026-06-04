@@ -31,6 +31,6 @@ final class NewCompress extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_NEWCOMPRESS;
+        return SshMessageType::NEWCOMPRESS;
     }
 }

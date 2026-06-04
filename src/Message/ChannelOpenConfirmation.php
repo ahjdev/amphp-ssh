@@ -38,6 +38,6 @@ final class ChannelOpenConfirmation extends Channel
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_OPEN_CONFIRMATION;
+        return SshMessageType::OPEN_CONFIRMATION;
     }
 }

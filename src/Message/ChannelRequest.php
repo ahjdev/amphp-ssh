@@ -35,7 +35,7 @@ abstract class ChannelRequest extends Channel
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    final public static function decode(SshBinary $data): self
     {
         $recipientChannel = $data->readInt();
         $type = ChannelRequestType::from($data->readString());
@@ -96,8 +96,8 @@ abstract class ChannelRequest extends Channel
     }
 
     #[\Override]
-    public static function getType(): SshMessageType
+    final public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_REQUEST;
+        return SshMessageType::CHANNEL_REQUEST;
     }
 }

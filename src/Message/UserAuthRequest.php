@@ -61,6 +61,6 @@ abstract class UserAuthRequest extends SshMessage
     #[\Override]
     final public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_USERAUTH_REQUEST;
+        return SshMessageType::USERAUTH_REQUEST;
     }
 }

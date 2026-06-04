@@ -10,6 +10,6 @@ final class ChannelSuccess extends Channel
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_SUCCESS;
+        return SshMessageType::CHANNEL_SUCCESS;
     }
 }

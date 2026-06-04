@@ -2,10 +2,8 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
-use Amp\Ssh\SshMessageType;
 
 abstract class Channel extends SshMessage
 {
@@ -24,11 +22,5 @@ abstract class Channel extends SshMessage
     {
         $recipientChannel = $data->readInt();
         return new static($recipientChannel);
-    }
-
-    #[\Override]
-    public static function getType(): SshMessageType
-    {
-        return SshMessageType::SSH_MSG_CHANNEL_CLOSE;
     }
 }

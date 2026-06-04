@@ -36,6 +36,6 @@ final class UserAuthBanner extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_USERAUTH_BANNER;
+        return SshMessageType::USERAUTH_BANNER;
     }
 }

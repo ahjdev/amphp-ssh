@@ -10,6 +10,6 @@ final class GlobalRequest extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_GLOBAL_REQUEST;
+        return SshMessageType::GLOBAL_REQUEST;
     }
 }

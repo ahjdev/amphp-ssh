@@ -2,7 +2,6 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
@@ -26,6 +25,6 @@ final class Unimplemented extends SshMessage
 
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_UNIMPLEMENTED;
+        return SshMessageType::UNIMPLEMENTED;
     }
 }

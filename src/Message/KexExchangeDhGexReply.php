@@ -9,6 +9,6 @@ final class KexExchangeDhGexReply extends KeyExchangeDhReply
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_KEX_DH_GEX_REPLY;
+        return SshMessageType::KEXDH_GEX_REPLY;
     }
 }

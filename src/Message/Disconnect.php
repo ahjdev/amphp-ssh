@@ -42,6 +42,6 @@ final class Disconnect extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_DISCONNECT;
+        return SshMessageType::DISCONNECT;
     }
 }

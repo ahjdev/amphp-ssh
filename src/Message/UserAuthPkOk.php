@@ -35,6 +35,6 @@ final class UserAuthPkOk extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_USERAUTH_PK_OK;
+        return SshMessageType::USERAUTH_PK_OK;
     }
 }

@@ -9,6 +9,6 @@ final class KexExchangeDhGexInit extends KeyExchangeDhInit
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_KEX_DH_GEX_INIT;
+        return SshMessageType::KEXDH_GEX_INIT;
     }
 }

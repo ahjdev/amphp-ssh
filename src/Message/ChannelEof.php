@@ -10,6 +10,6 @@ final class ChannelEof extends Channel
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_EOF;
+        return SshMessageType::CHANNEL_EOF;
     }
 }

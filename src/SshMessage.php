@@ -10,26 +10,30 @@ abstract class SshMessage implements \Stringable
     use ForbidCloning;
     use ForbidSerialization;
 
-    abstract public static function getNumber(): SshMessageType;
+    abstract public static function getType(): SshMessageType;
+
+    public static function decode(SshBinary $data): self
+    {
+        return new static();
+    }
+
+    public function encode(): string
+    {
+        return \pack('C', static::getNumber());
+    }
 
     final static public function toNameList(array $value): string
     {
         return \implode(',', $value);
     }
 
+    final static public function getNumber(): int
+    {
+        return self::getType()->getNumber();
+    }
+
     final public function __toString(): string
     {
         return $this->encode();
-    }
-
-    public static function decode(): \Generator
-    {
-        $number = yield 2; // todo
-        return new static();
-    }
-
-    public function encode(): string
-    {
-        return \pack('C', self::getNumber()->value);
     }
 }

@@ -28,6 +28,6 @@ class KeyExchangeDhInit extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_KEXDH_INIT;
+        return SshMessageType::KEX_ECDH_INIT;
     }
 }

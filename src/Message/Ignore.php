@@ -29,6 +29,6 @@ final class Ignore extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_IGNORE;
+        return SshMessageType::IGNORE;
     }
 }

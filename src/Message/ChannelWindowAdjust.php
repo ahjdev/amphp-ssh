@@ -32,6 +32,6 @@ final class ChannelWindowAdjust extends Channel
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_WINDOW_ADJUST;
+        return SshMessageType::CHANNEL_WINDOW_ADJUST;
     }
 }

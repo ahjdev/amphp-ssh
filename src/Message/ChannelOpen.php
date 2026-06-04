@@ -45,6 +45,6 @@ final class ChannelOpen extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_OPEN;
+        return SshMessageType::CHANNEL_OPEN;
     }
 }

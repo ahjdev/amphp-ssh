@@ -39,6 +39,6 @@ final class ChannelOpenFailure extends Channel
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_CHANNEL_OPEN_FAILURE;
+        return SshMessageType::OPEN_FAILURE;
     }
 }

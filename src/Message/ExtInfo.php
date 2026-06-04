@@ -41,7 +41,7 @@ final class ExtInfo extends SshMessage implements \IteratorAggregate
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_EXT_INFO;
+        return SshMessageType::EXT_INFO;
     }
 
     public function getIterator(): \Traversable

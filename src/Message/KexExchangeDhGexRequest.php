@@ -7,7 +7,7 @@ use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
 
-final class KexDhGexRequest extends SshMessage
+final class KexExchangeDhGexRequest extends SshMessage
 {
     public function __construct(
         public readonly int $min = 2048,
@@ -35,6 +35,6 @@ final class KexDhGexRequest extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_KEX_DH_GEX_REQUEST;
+        return SshMessageType::KEXDH_GEX_REQUEST;
     }
 }

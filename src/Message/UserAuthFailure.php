@@ -37,6 +37,6 @@ final class UserAuthFailure extends SshMessage
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_USERAUTH_FAILURE;
+        return SshMessageType::USERAUTH_FAILURE;
     }
 }

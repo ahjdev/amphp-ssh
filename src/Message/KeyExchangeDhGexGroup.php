@@ -31,6 +31,6 @@ final class KeyExchangeDhGexGroup extends SshMessage
 
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_KEX_DH_GEX_GROUP;
+        return SshMessageType::KEXDH_GEX_GROUP;
     }
 }

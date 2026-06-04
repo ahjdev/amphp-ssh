@@ -8,6 +8,6 @@ final class ServiceRequest extends Service
 {
     public static function getType(): SshMessageType
     {
-        return SshMessageType::SSH_MSG_SERVICE_REQUEST;
+        return SshMessageType::SERVICE_REQUEST;
     }
 }
