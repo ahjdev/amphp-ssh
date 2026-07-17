@@ -12,7 +12,7 @@ abstract class SshMessage implements \Stringable
 
     abstract public static function getType(): SshMessageType;
 
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
         return new static();
     }
@@ -20,11 +20,6 @@ abstract class SshMessage implements \Stringable
     public function encode(): string
     {
         return \pack('C', static::getNumber());
-    }
-
-    final static public function toNameList(array $value): string
-    {
-        return \implode(',', $value);
     }
 
     final static public function getNumber(): int
