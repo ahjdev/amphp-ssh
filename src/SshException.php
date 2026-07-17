@@ -2,6 +2,8 @@
 
 namespace Amp\Ssh;
 
-class SshException extends \Exception
+use Amp\ByteStream\StreamException;
+
+class SshException extends StreamException
 {
 }
