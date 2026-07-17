@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class Ignore extends SshMessage
 {
@@ -20,9 +19,9 @@ final class Ignore extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $data = $data->readString();
+        $data = Strings::unpackSSH2('s', $data)[0];
         return new static($data);
     }
 

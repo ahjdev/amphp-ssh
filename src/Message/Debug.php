@@ -6,6 +6,7 @@ use Amp\Ssh;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class Debug extends SshMessage
 {
@@ -28,12 +29,9 @@ final class Debug extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $alwaysDisplay = $data->readBoolean();
-        $message       = $data->readString();
-        $languageTag   = $data->readString();
-
+        [$alwaysDisplay, $message, $languageTag] = Strings::unpackSSH2('bs2', $data);
         return new static($alwaysDisplay, $message, $languageTag);
     }
 

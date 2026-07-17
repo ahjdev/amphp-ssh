@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class UserAuthPkOk extends SshMessage
 {
@@ -24,11 +23,9 @@ final class UserAuthPkOk extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $algorithm = $data->readString();
-        $blob      = $data->readString();
-
+        [$algorithm, $blob] = Strings::unpackSSH2('s2', $data);
         return new static($algorithm, $blob);
     }
 

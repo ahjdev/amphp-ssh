@@ -2,15 +2,13 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\Message\UserAuthRequestAskPublicKey;
 use Amp\Ssh\Message\UserAuthRequestPassword;
 use Amp\Ssh\Message\UserAuthRequestSignedPublicKey;
 use Amp\Ssh\Message\UserAuthRequestType;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
-use Amp\Ssh\Transport\SshParserException;
+use phpseclib3\Common\Functions\Strings;
 
 abstract class UserAuthRequest extends SshMessage
 {
@@ -34,26 +32,21 @@ abstract class UserAuthRequest extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $username = $data->readString();
-        $service = $data->readString();
-        $type = UserAuthRequestType::from($data->readString());
+        [$username, $service, $type] = Strings::unpackSSH2('s3', $data);
+        $type = UserAuthRequestType::from($type);
 
         switch ($type) {
             case UserAuthRequestType::PASSWORD:
-                $newPassword = $data->readBoolean();
-                $password    = $data->readString();
-                $newPassword =  $newPassword ? $data->readString() : null;
+                [$newPassword, $password] = Strings::unpackSSH2('bs', $data);
+                $newPassword =  $newPassword ? Strings::unpackSSH2('s', $data)[0] : null;
                 return new UserAuthRequestPassword($username, $password, $newPassword, $service);
 
             case UserAuthRequestType::PUBLIC_KEY:
-                $hasSignature = $data->readBoolean();
-                $algorithm    = $data->readString();
-                $blob         = $data->readString();
-
+                [$hasSignature, $algorithm, $blob] = Strings::unpackSSH2('bs2', $data);
                 return $hasSignature
-                    ? new UserAuthRequestSignedPublicKey($username, $algorithm, $blob, $data->readString(), $service)
+                    ? new UserAuthRequestSignedPublicKey($username, $algorithm, $blob, Strings::unpackSSH2('s', $data)[0], $service)
                     : new UserAuthRequestAskPublicKey($username, $algorithm, $blob, $service);
         };
     }

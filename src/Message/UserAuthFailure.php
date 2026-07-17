@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class UserAuthFailure extends SshMessage
 {
@@ -16,21 +15,13 @@ final class UserAuthFailure extends SshMessage
     #[\Override]
     public function encode(): string
     {
-        $nextAuthentications = $this->toNameList($this->nextAuthentications);
-        return \pack(
-            'C*Na*C',
-            self::getNumber(),
-            \strlen($nextAuthentications), $nextAuthentications,
-            $this->partialSuccess,
-        );
+        return Strings::packSSH2('CLb', self::getNumber(), $this->nextAuthentications, $this->partialSuccess);
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $nextAuthentications = $data->readNamelist();
-        $partialSuccess = $data->readBoolean();
-
+        [$nextAuthentications, $partialSuccess] = Strings::unpackSSH2('Lb', $data);
         return new static($nextAuthentications, $partialSuccess);
     }
 

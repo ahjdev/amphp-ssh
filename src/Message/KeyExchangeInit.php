@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class KeyExchangeInit extends SshMessage
 {
@@ -31,58 +30,29 @@ final class KeyExchangeInit extends SshMessage
     #[\Override]
     public function encode(): string
     {
-        $kex         = $this->toNameList($this->kex);
-        $hostKey     = $this->toNameList($this->hostKey);
-        $encryptC2S  = $this->toNameList($this->encryptC2S);
-        $encryptS2C  = $this->toNameList($this->encryptS2C);
-        $macC2S      = $this->toNameList($this->macC2S);
-        $macS2C      = $this->toNameList($this->macS2C);
-        $compressC2S = $this->toNameList($this->compressC2S);
-        $compressS2C = $this->toNameList($this->compressS2C);
-        $langC2S     = $this->toNameList($this->langC2S);
-        $langS2C     = $this->toNameList($this->langS2C);
-
-        return \pack(
-            'Ca*Na*Na*Na*Na*Na*Na*Na*Na*Na*Na*CN',
+        return Strings::packSSH2(
+            'Ca*L10bN',
             self::getNumber(),
             $this->cookie,
-            \strlen($kex), $kex,
-            \strlen($hostKey), $hostKey,
-            \strlen($encryptC2S), $encryptC2S,
-            \strlen($encryptS2C), $encryptS2C,
-            \strlen($macC2S), $macC2S,
-            \strlen($macS2C), $macS2C,
-            \strlen($compressC2S), $compressC2S,
-            \strlen($compressS2C), $compressS2C,
-            \strlen($langC2S), $langC2S,
-            \strlen($langS2C), $langS2C,
-            $this->firstPacket, 0
+            $this->kex,
+            $this->hostKey,
+            $this->encryptC2S,
+            $this->encryptS2C,
+            $this->macC2S,
+            $this->macS2C,
+            $this->compressC2S,
+            $this->compressS2C,
+            $this->langC2S,
+            $this->langS2C,
+            $this->firstPacket,
+            0,
         );
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $kex = $data->readString();
-        $hostKey = $data->readNamelist();
-        // Encryption
-        $encryptC2S = $data->readNamelist();
-        $encryptS2C = $data->readNamelist();
-        // Mac
-        $macC2S = $data->readNamelist();
-        $macS2C = $data->readNamelist();
-        // Compress
-        $compressC2S = $data->readNamelist();
-        $compressS2C = $data->readNamelist();
-        // Lang
-        $langC2S = $data->readNamelist();
-        $langS2C = $data->readNamelist();
-
-        return new static(
-            $kex, $hostKey,
-            $encryptC2S, $encryptS2C, $macC2S, $macS2C,
-            $compressC2S, $compressS2C, $langC2S, $langS2C,
-        );
+        return new static(... Strings::unpackSSH2('a*L10b', $data));
     }
 
     #[\Override]

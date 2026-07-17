@@ -2,20 +2,20 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 class KeyExchangeDhReply extends SshMessage
 {
     final public function __construct(
         public readonly string $hostKey,
-        public readonly string $hostKeyFormat,
         public readonly string $fBytes,
         public readonly string $signature,
-        public readonly string $signatureFormat,
     ) {
+        if (strlen($this->signature) < 4) {
+            throw new \LengthException('The signature needs at least four bytes');
+        }
     }
 
     #[\Override]
@@ -31,17 +31,10 @@ class KeyExchangeDhReply extends SshMessage
     }
 
     #[\Override]
-    final public static function decode(SshBinary $data): self
+    final public static function decode(string $data): self
     {
-        $hostKey   = $data->readString();
-        $fBytes    = $data->readString();
-        $signature = $data->readString();
-        //
-        $hostKeyFormat = (new SshBinary($hostKey))->readString();
-        //
-        $signatureFormat = (new SshBinary($signature))->readString();
-
-        return new static($hostKey, $hostKeyFormat, $fBytes, $signature, $signatureFormat);
+        [$hostKey, $fBytes, $signature] = Strings::unpackSSH2('s3', $data);
+        return new static($hostKey, $fBytes, $signature);
     }
 
     #[\Override]

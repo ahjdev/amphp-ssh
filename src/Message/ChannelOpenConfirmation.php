@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class ChannelOpenConfirmation extends Channel
 {
@@ -25,19 +24,15 @@ final class ChannelOpenConfirmation extends Channel
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $recipient = $data->readInt();
-        $sender = $data->readInt();
-        $initWindowSize = $data->readInt();
-        $maxPacketSize  = $data->readInt();
-
+        [$recipient, $sender, $initWindowSize, $maxPacketSize] = Strings::unpackSSH2('N4', $data);
         return new static($recipient, $sender, $initWindowSize, $maxPacketSize);
     }
 
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::OPEN_CONFIRMATION;
+        return SshMessageType::CHANNEL_OPEN_CONFIRMATION;
     }
 }

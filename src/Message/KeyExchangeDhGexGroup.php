@@ -2,9 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class KeyExchangeDhGexGroup extends SshMessage
 {
@@ -21,11 +21,9 @@ final class KeyExchangeDhGexGroup extends SshMessage
         );
     }
 
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $prime = $data->readString();
-        $generator = $data->readString();
-
+        [$prime, $generator] = Strings::unpackSSH2('s2', $data);
         return new self($prime, $generator);
     }
 

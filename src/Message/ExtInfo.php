@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class ExtInfo extends SshMessage implements \IteratorAggregate
 {
@@ -27,12 +26,13 @@ final class ExtInfo extends SshMessage implements \IteratorAggregate
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $count = $data->readInt();
+        $count = Strings::unpackSSH2('N', $data)[0];
         $extensions = [];
         for ($i = 0; $i < $count; $i++) {
-            $extensions[$data->readString()] = $data->readString();
+            [$name, $value] = Strings::unpackSSH2('s2', $data);
+            $extensions[$name] = $value;
         }
 
         return new static($extensions);

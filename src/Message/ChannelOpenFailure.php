@@ -6,6 +6,7 @@ use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class ChannelOpenFailure extends Channel
 {
@@ -26,19 +27,15 @@ final class ChannelOpenFailure extends Channel
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $channel = $data->readInt();
-        $reasonCode = $data->readInt();
-        $description = $data->readString();
-        $languageTag = $data->readString();
-
+        [$channel, $reasonCode, $description, $languageTag] = Strings::unpackSSH2('N2s2', $data);
         return new static($channel, $reasonCode, $description, $languageTag);
     }
 
     #[\Override]
     public static function getType(): SshMessageType
     {
-        return SshMessageType::OPEN_FAILURE;
+        return SshMessageType::CHANNEL_OPEN_FAILURE;
     }
 }

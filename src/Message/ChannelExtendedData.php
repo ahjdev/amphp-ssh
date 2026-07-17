@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class ChannelExtendedData extends Channel
 {
@@ -21,11 +20,9 @@ final class ChannelExtendedData extends Channel
         return parent::encode() . \pack('N2a*', $this->type, \strlen($this->data), $this->data);
     }
 
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $recipientChannel = $data->readInt();
-        $type = $data->readInt();
-        $data = $data->readString();
+        [$recipientChannel, $type, $data] = Strings::unpackSSH2('N2s', $data);
 
         return new static($recipientChannel, $type, $data);
     }

@@ -13,6 +13,7 @@ use Amp\Ssh\Message\ChannelRequestWindowChange;
 use Amp\Ssh\Message\Signal;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 /**
  * @internal
@@ -35,18 +36,13 @@ abstract class ChannelRequest extends Channel
     }
 
     #[\Override]
-    final public static function decode(SshBinary $data): self
+    final public static function decode(string $data): self
     {
-        $recipientChannel = $data->readInt();
-        $type = ChannelRequestType::from($data->readString());
-        $wantReply = $data->readBoolean();
+        [$recipientChannel, $type, $wantReply] = Strings::unpackSSH2('Nsb', $data);
+        $type = ChannelRequestType::from($type);
 
         if ($type === ChannelRequestType::PTY) {
-            $term    = $data->readString();
-            $columns = $data->readInt();
-            $rows    = $data->readInt();
-            $width   = $data->readInt();
-            $height  = $data->readInt();
+            [$term, $columns, $rows, $width, $height] = Strings::unpackSSH2('sN4', $data);
             $modes = [];
             $mode = new SshBinary($data->readString());
             while ($mode->isReadable()) {
@@ -64,33 +60,36 @@ abstract class ChannelRequest extends Channel
             ChannelRequestType::EXEC  => new ChannelRequestExec(
                 $recipientChannel,
                 wantReply: $wantReply,
-                command  : $data->readString()
+                command  : Strings::unpackSSH2('s', $data)[0],
             ),
             ChannelRequestType::EXIT_STATUS => new ChannelRequestExitStatus(
                 $recipientChannel,
-                code: $data->readInt()
+                code: Strings::unpackSSH2('N', $data)[0],
             ),
             ChannelRequestType::SIGNAL => new ChannelRequestSignal(
                 $recipientChannel,
-                signal: Signal::from($data->readString())
+                signal: Signal::from(Strings::unpackSSH2('s', $data)[0])
             ),
             ChannelRequestType::EXIT_SIGNAL => new ChannelRequestExitSignal(
                 $recipientChannel,
                 wantReply   : $wantReply,
-                coreDumped  : $data->readBoolean(),
-                errorMessage: $data->readString(),
-                languageTag : $data->readString(),
-                signal      : Signal::from($data->readString()),
+                coreDumped  : Strings::unpackSSH2('b', $data)[0],
+                errorMessage: Strings::unpackSSH2('s', $data)[0],
+                languageTag : Strings::unpackSSH2('s', $data)[0],
+                signal      : Signal::from(Strings::unpackSSH2('s', $data)[0]),
             ),
             ChannelRequestType::ENV => new ChannelRequestEnv(
                 $recipientChannel,
                 wantReply: $wantReply,
-                name     : $data->readString(), value: $data->readString()
+                name : Strings::unpackSSH2('s', $data)[0],
+                value: Strings::unpackSSH2('s', $data)[0]
             ),
             ChannelRequestType::WINDOW_CHANGE => new ChannelRequestWindowChange(
                 $recipientChannel,
-                columns: $data->readInt(), rows  : $data->readInt(),
-                width  : $data->readInt(), height: $data->readInt(),
+                columns: Strings::unpackSSH2('N', $data)[0],
+                rows   : Strings::unpackSSH2('N', $data)[0],
+                width  : Strings::unpackSSH2('N', $data)[0],
+                height : Strings::unpackSSH2('N', $data)[0],
             ),
         };
     }

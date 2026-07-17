@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class KexExchangeDhGexRequest extends SshMessage
 {
@@ -23,12 +22,9 @@ final class KexExchangeDhGexRequest extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $min   = $data->readInt();
-        $ideal = $data->readInt();
-        $max   = $data->readInt();
-
+        [$min, $ideal, $max] = Strings::unpackSSH2('N3', $data);
         return new static($min, $ideal, $max);
     }
 

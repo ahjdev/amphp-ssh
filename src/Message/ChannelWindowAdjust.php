@@ -6,6 +6,7 @@ use Amp\Ssh;
 use Amp\Ssh\Message\Channel;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class ChannelWindowAdjust extends Channel
 {
@@ -21,12 +22,10 @@ final class ChannelWindowAdjust extends Channel
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $channel    = $data->readInt();
-        $bytesToAdd = $data->readInt();
-
-        return new static($channel, $bytesToAdd);
+        [$recipientChannel, $windowIncrement] = Strings::unpackSSH2('N2', $data);
+        return new static($recipientChannel, $windowIncrement);
     }
 
     #[\Override]

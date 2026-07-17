@@ -8,7 +8,7 @@ final class UserAuthRequestPassword extends UserAuthRequest
 {
     public function __construct(
         string $username,
-        private readonly string $password = '',
+        #[\SensitiveParameter] private readonly string $password = '',
         private readonly ?string $newPassword = null,
         string $serviceName = 'ssh-connection',
     ) {

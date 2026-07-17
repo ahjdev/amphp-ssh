@@ -11,7 +11,7 @@ abstract class UserAuthRequestPublicKey extends UserAuthRequest
     public function __construct(
         string $username,
         protected readonly string $algorithm,
-        protected readonly string $blob,
+        #[\SensitiveParameter] protected readonly string $blob,
         string $serviceName = 'ssh-connection',
     ) {
         parent::__construct($username, $serviceName);

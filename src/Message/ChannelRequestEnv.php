@@ -19,6 +19,10 @@ final class ChannelRequestEnv extends ChannelRequest
     #[\Override]
     public function encode(): string
     {
-        return parent::encode() . \pack('Na*Na*', \strlen($this->name), $this->name, \strlen($this->value), $this->value);
+        return parent::encode() . \pack(
+            'Na*Na*',
+            \strlen($this->name), $this->name,
+            \strlen($this->value), $this->value
+        );
     }
 }

@@ -2,9 +2,8 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
+use phpseclib3\Common\Functions\Strings;
 
 /**
  * @internal
@@ -16,9 +15,9 @@ abstract class Service extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $name = $data->readString();
+        $name = Strings::unpackSSH2('s', $data)[0];
         return new static($name);
     }
 }

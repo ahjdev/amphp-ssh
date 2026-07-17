@@ -2,11 +2,10 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
 use Amp\Ssh\Message\ChannelType;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class ChannelOpen extends SshMessage
 {
@@ -32,13 +31,9 @@ final class ChannelOpen extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $type = $data->readString();
-        $sender = $data->readInt();
-        $initWindowSize = $data->readInt();
-        $maxPacketSize = $data->readInt();
-
+        [$type, $sender, $initWindowSize, $maxPacketSize] = Strings::unpackSSH2('sN3', $data);
         return new static(ChannelType::from($type), $sender, $initWindowSize, $maxPacketSize);
     }
 

@@ -2,8 +2,8 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
+use phpseclib3\Common\Functions\Strings;
 
 abstract class Channel extends SshMessage
 {
@@ -18,9 +18,9 @@ abstract class Channel extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $recipientChannel = $data->readInt();
+        [$recipientChannel] = Strings::unpackSSH2('N', $data);
         return new static($recipientChannel);
     }
 }

@@ -8,7 +8,7 @@ final class UserAuthRequestSignedPublicKey extends UserAuthRequestPublicKey
         string $username,
         string $algorithm,
         string $blob,
-        private ?string $signature = null,
+        #[\SensitiveParameter] private ?string $signature = null,
         string $serviceName = 'ssh-connection',
     ) {
         parent::__construct($username, $serviceName, $algorithm, $blob);
@@ -20,7 +20,7 @@ final class UserAuthRequestSignedPublicKey extends UserAuthRequestPublicKey
         return true;
     }
 
-    public function setSignature(string $signature): self
+    public function setSignature(#[\SensitiveParameter] string $signature): self
     {
         $this->signature = $signature;
         return $this;

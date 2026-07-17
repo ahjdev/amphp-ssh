@@ -2,10 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh;
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class NewCompress extends SshMessage
 {
@@ -20,11 +19,9 @@ final class NewCompress extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $algorithm = $data->readString();
-        $clientCanAccept = $data->readBoolean();
-
+        [$algorithm, $clientCanAccept] = Strings::unpackSSH2('sb', $data);
         return new static($algorithm, $clientCanAccept);
     }
 

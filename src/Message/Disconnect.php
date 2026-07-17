@@ -7,6 +7,7 @@ use Amp\Ssh\Message\DisconnectReason;
 use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class Disconnect extends SshMessage
 {
@@ -30,12 +31,9 @@ final class Disconnect extends SshMessage
     }
 
     #[\Override]
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $reasonCode  = $data->readInt();
-        $description = $data->readString();
-        $languageTag = $data->readString();
-
+        [$reasonCode, $description, $languageTag] = Strings::unpackSSH2('Ns2', $data);
         return new static(DisconnectReason::from($reasonCode), $description, $languageTag);
     }
 

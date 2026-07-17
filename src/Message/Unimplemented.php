@@ -2,9 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 final class Unimplemented extends SshMessage
 {
@@ -17,9 +17,9 @@ final class Unimplemented extends SshMessage
         return \pack('CN', self::getNumber(), $this->seqNumber);
     }
 
-    public static function decode(SshBinary $data): self
+    public static function decode(string $data): self
     {
-        $seqNumber = $data->readInt();
+        $seqNumber = Strings::unpackSSH2('N', $data)[0];
         return new static($seqNumber);
     }
 

@@ -2,9 +2,9 @@
 
 namespace Amp\Ssh\Message;
 
-use Amp\Ssh\SshBinary;
 use Amp\Ssh\SshMessage;
 use Amp\Ssh\SshMessageType;
+use phpseclib3\Common\Functions\Strings;
 
 class KeyExchangeDhInit extends SshMessage
 {
@@ -19,9 +19,9 @@ class KeyExchangeDhInit extends SshMessage
     }
 
     #[\Override]
-    final public static function decode(SshBinary $data): self
+    final public static function decode(string $data): self
     {
-        $exchange = $data->readString();
+        $exchange = Strings::unpackSSH2('s', $data)[0];
         return new static($exchange);
     }
 
