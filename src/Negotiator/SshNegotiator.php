@@ -8,6 +8,7 @@ use Amp\Ssh\Crypto\SshMac;
 
 interface SshNegotiator
 {
+    public function getSessionId(): string;
     public function getEncryption(): ?SshCipher;
     public function getDecryption(): ?SshCipher;
     public function getInboundMac(): ?SshMac;

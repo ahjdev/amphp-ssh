@@ -9,6 +9,7 @@ use Amp\Ssh\Compression\SshCompression;
 final class Rfc4253Negotiator implements SshNegotiator
 {
     public function __construct(
+        public readonly string $sessionId,
         public readonly SshCompression $compress,
         public readonly SshCompression $decompress,
         public readonly ?SshCipher $encrypt = null,
@@ -16,6 +17,12 @@ final class Rfc4253Negotiator implements SshNegotiator
         public readonly ?SshMac $inboundMac = null,
         public readonly ?SshMac $outboundMac = null,
     ) {
+    }
+
+    #[\Override]
+    public function getSessionId(): string
+    {
+        return $this->sessionId;
     }
 
     #[\Override]
