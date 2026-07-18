@@ -7,8 +7,9 @@ use phpseclib3\Crypt\Common\PrivateKey;
 use phpseclib3\Crypt\Common\PublicKey;
 use phpseclib3\Crypt\DSA\PublicKey as DSAPublicKey;
 use phpseclib3\Crypt\EC\PublicKey  as ECPublicKey;
+use phpseclib3\Crypt\RSA;
 use phpseclib3\Crypt\RSA\PublicKey as RSAPublicKey;
-use Amp\Ssh\SshHostKey;
+use Amp\Ssh\Crypto\SshHostKey;
 use Amp\Ssh\Transport\SshPacketHandler;
 use Amp\Ssh\Message\UserAuthPkOk;
 use Amp\Ssh\Message\UserAuthRequestAskPublicKey;
@@ -18,21 +19,24 @@ use Amp\Ssh\Message\UserAuthSuccess;
 class SshPublicKey extends SshAuthentication
 {
     public function __construct(
-        private string $username,
-        private string $privateKey,
-        private string $passphrase = ''
+        #[\SensitiveParameter] string $username,
+        #[\SensitiveParameter] private string $privateKey,
+        #[\SensitiveParameter] private string $passphrase = ''
     ) {
+        parent::__construct($username);
     }
 
-    final public function authenticate(string $sessionId, SshPacketHandler $packetHandler)
+    #[\Override]
+    final public function authenticate(SshPacketHandler $packetHandler)
     {
         $this->requestService($packetHandler);
-        $this->requestPublicKey($sessionId, $packetHandler);
+        $this->requestPublicKey($packetHandler);
     }
 
-    private function requestPublicKey(string $sessionId, SshPacketHandler $packetHandler)
+    private function requestPublicKey(SshPacketHandler $packetHandler)
     {
-        [$type, $publicKey, $privateKey] = $this->loadKeys();
+        $supportedAlgos = $packetHandler->getSupportedPublicKeyAlgorithms();
+        [$type, $publicKey, $privateKey] = $this->loadKeys($supportedAlgos);
         $blob = $publicKey->toString('OpenSSH', ['binary' => true]);
 
         // Ask
@@ -45,7 +49,7 @@ class SshPublicKey extends SshAuthentication
 
         // Request
         $packet = new UserAuthRequestSignedPublicKey($this->username, $type->value, $blob);
-        $signature = $type->getSignature($sessionId, $packet, $privateKey);
+        $signature = $type->getSignature($packetHandler->getSessionId(), $privateKey, $packet);
         $packet->setSignature($signature);
         $request = $packetHandler->writeMessage($packet);
 
@@ -57,7 +61,7 @@ class SshPublicKey extends SshAuthentication
     /**
      * @return array{0: SshHostKey, 1: PublicKey, 2: PrivateKey}
      */
-    private function loadKeys(): array
+    private function loadKeys(array $supportedAlgos): array
     {
         $privateKey = PublicKeyLoader::load($this->privateKey, $this->passphrase);
 
@@ -68,8 +72,15 @@ class SshPublicKey extends SshAuthentication
         $publicKey  = $privateKey->getPublicKey();
 
         if ($publicKey instanceof RSAPublicKey) {
+            $algorithm = 'ssh-rsa';
+            $algos = ['rsa-sha2-256', 'rsa-sha2-512', 'ssh-rsa'];
+            foreach ($algos as $algorithm) {
+                if (\in_array($algorithm, $supportedAlgos, true)) {
+                    break;
+                }
+            }
             $privateKey = $privateKey->withPadding(RSA::SIGNATURE_PKCS1);
-            $type = SshHostKey::RSA_SHA1;
+            $type = SshHostKey::from($algorithm);
         } else if ($publicKey instanceof DSAPublicKey) {
             $type = SshHostKey::DSA;
             $privateKey = $privateKey->withSignatureFormat('SSH2');
@@ -77,7 +88,7 @@ class SshPublicKey extends SshAuthentication
             $privateKey = $privateKey->withSignatureFormat('SSH2');
             $type = SshHostKey::fromCurve($privateKey->getCurve()); // todo can be array
         } else {
-            // todo:// add exception
+            throw new SshAuthenticationFailureException('Cannot get private key (maybe wrong passphrase ?)');
         }
 
         $privateKey->withHash($type->getHashAlgorithm());

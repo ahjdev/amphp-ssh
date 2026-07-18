@@ -9,11 +9,15 @@ use Amp\Ssh\Authentication\SshAuthenticationFailureException;
 
 final class SshPassword extends SshAuthentication
 {
-    public function __construct(private readonly string $username, private readonly string $password)
-    {
+    public function __construct(
+        #[\SensitiveParameter] string $username,
+        #[\SensitiveParameter] private readonly string $password
+    ) {
+        parent::__construct($username);
     }
 
-    public function authenticate(string $sessionId, SshPacketHandler $packetHandler)
+    #[\Override]
+    public function authenticate(SshPacketHandler $packetHandler)
     {
         $this->requestService($packetHandler);
         $this->requestPassword($packetHandler);

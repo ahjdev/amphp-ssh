@@ -7,10 +7,13 @@ use Amp\File;
 final class SshPublicKeyFile extends SshPublicKey
 {
     public function __construct(
-        private string $username,
-        private string $privateKeyPath = '~/.ssh/id_rsa',
-        private string $passphrase = ''
+        #[\SensitiveParameter] string $username,
+        string $privateKeyPath = '~/.ssh/id_rsa',
+        #[\SensitiveParameter] string $passphrase = ''
     ) {
-        parent::__construct($username, File\read($this->privateKeyPath), $passphrase);
+        if (!File\isFile($privateKeyPath)) {
+            throw new SshAuthenticationFailureException("PrivateKey file doesn't exists!");
+        }
+        parent::__construct($username, File\read($privateKeyPath), $passphrase);
     }
 }
