@@ -3,9 +3,12 @@
 namespace Amp\Ssh;
 
 use Amp\Cancellation;
-use Psr\Http\Message\UriInterface as PsrUri;
+use Amp\Socket\SocketAddress;
+use Amp\Socket\SocketConnector;
+use Amp\Ssh\Authentication\SshAuthentication;
+use Amp\Ssh\Connection\SshConnection;
 
 interface SshConnector
 {
-    public function connect(PsrUri|string $uri, SshAuthentication $authentication, ?Cancellation $cancellation = null, string $identification = 'SSH-2.0-AmpSSH_0.1'): SshResource;
+    public function connect(SocketAddress|string $uri, SshAuthentication $authentication, ?SocketConnector $connector = null, ?Cancellation $cancellation = null, string $identification = 'SSH-2.0-AmpSSH_0.1'): SshConnection;
 }
