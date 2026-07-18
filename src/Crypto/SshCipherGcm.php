@@ -28,6 +28,7 @@ final class SshCipherGcm extends SshCipherAead
     public function decrypt(string $length, string $packet, ?string $nonce = null): string
     {
         $this->setupGcm($length);
+        $this->setTag($packet);
         return $this->key->decrypt($packet);
     }
 
